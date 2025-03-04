@@ -33,6 +33,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_joystick: ^0.2.1
+  flutter_launcher_icons: ^0.14.3
+  flutter_splash_screen: ^3.0.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0

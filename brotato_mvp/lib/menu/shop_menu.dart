@@ -1,7 +1,9 @@
+import 'package:brotato_mvp/game.dart';
 import 'package:brotato_mvp/main.dart';
 import 'package:flutter/material.dart';
 
 class ShopMenu extends StatelessWidget {
+  static const id = 'ShopID';
   final BrotatoGame game;
   const ShopMenu({super.key, required this.game});
 

@@ -1,9 +1,10 @@
+import 'package:brotato_mvp/game.dart';
 import 'package:brotato_mvp/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class MainMenu extends StatelessWidget {
-  static const id = 'main_menu';
+  static const id = 'MainID';
   final BrotatoGame game;
   const MainMenu({super.key, required this.game});
 

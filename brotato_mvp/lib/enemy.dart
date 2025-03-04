@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:async' as da;
 import 'package:brotato_mvp/bullet.dart';
+import 'package:brotato_mvp/game.dart';
 import 'package:brotato_mvp/main.dart';
 import 'package:brotato_mvp/player.dart';
 import 'package:flame/collisions.dart';

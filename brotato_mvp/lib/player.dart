@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:brotato_mvp/enemy.dart';
+import 'package:brotato_mvp/game.dart';
 import 'package:brotato_mvp/main.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -22,6 +23,7 @@ class Player extends SpriteAnimationComponent
   late SpriteAnimation astronautLeft;
   late SpriteAnimation astronautUp;
   late final HealthBar healthBar = HealthBar();
+  late final ExpBar expBar = ExpBar();
 
   int health = 100;
 
@@ -119,12 +121,52 @@ class HealthBar extends PositionComponent {
     double marginLeft = 0; // add margin left
 
     // Dessinez la barre de vie
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '${health ~/ 1}/${maxWidth ~/ 1}',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+        marginLeft + (maxWidth - textPainter.width) / 2,
+        marginTop + (height - textPainter.height) / 2,
+      ),
+    );
+  }
+}
+
+class ExpBar extends PositionComponent {
+  double exp = 0; // valeur initiale de la vie
+  double maxExp = 10; // largeur maximale de la barre de vie
+
+  ExpBar() {
+    width = maxExp;
+    height = 20;
+  }
+
+  void updateExp(double newExp) {
+    exp = newExp;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    double marginTop = 0; // add margin top
+    double marginLeft = 0; // add margin left
+
+    // Dessinez la barre de vie
     canvas.drawRect(Rect.fromLTWH(marginLeft, marginTop, width, height),
-        Paint()..color = Colors.red);
+        Paint()..color = const Color.fromARGB(255, 54, 95, 244));
 
     // Dessinez la quantité de vie restante
     canvas.drawRect(
-        Rect.fromLTWH(marginLeft, marginTop, health / 100 * maxWidth, height),
+        Rect.fromLTWH(marginLeft, marginTop, exp / 100 * maxExp, height),
         Paint()..color = Colors.green);
   }
 }
