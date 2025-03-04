@@ -20,13 +20,15 @@ abstract class Enemy extends SpriteComponent
   final _collisionStartColor = Colors.amber;
   final _collisionBulletHitColor = Colors.red;
   final _collisionPlayerHitColor = Colors.pink;
+  int damage = 1; // Valeur par défaut pour tous les ennemis
 
   @override
   void update(double dt) {
-    final playerPos = game.player.position;
-    moveTowardsPlayer(
-        Vector2(playerPos.x, playerPos.y), dt); // Centre du joueur
-
+    if (game.player != null) {
+      final playerPos = game.player!.position;
+      moveTowardsPlayer(
+          Vector2(playerPos.x, playerPos.y), dt); // Centre du joueur
+    }
     super.update(dt);
   }
 

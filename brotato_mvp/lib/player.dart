@@ -56,7 +56,7 @@ class Player extends SpriteAnimationComponent
     health -= damage;
     healthBar.updateHealth(health.toDouble());
     if (health <= 0) {
-      // GAME OVER
+      game.onPlayerDeath();
     }
   }
 
@@ -64,9 +64,7 @@ class Player extends SpriteAnimationComponent
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
-    if (other is WeakEnemy) {
-      print(
-          'Player has been hit by ${other.runtimeType} with ${other.damage} damage');
+    if (other is Enemy) {
       takeDamage(other.damage);
     }
   }
@@ -74,7 +72,7 @@ class Player extends SpriteAnimationComponent
   @override
   void update(double dt) {
     super.update(dt);
-    // if (game.state != GameState.playing) return;
+    if (game.state != GameState.playing) return;
 
     if (game.joystick.direction != JoystickDirection.idle) {
       position.add(game.joystick.relativeDelta * 450 * dt);
