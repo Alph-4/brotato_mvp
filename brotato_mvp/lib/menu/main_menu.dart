@@ -15,46 +15,37 @@ class MainMenu extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Brotato',
-              style: Theme.of(context).textTheme.bodyLarge,
+              'Space Botato',
+              style: Theme.of(context).textTheme.displayLarge,
             ),
             SizedBox(height: 20),
-            Container(
-              width: 200,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  game.startNewGame();
-                  //Navigator.of(context).pushNamed(SpaceBotatoGame.id);
-                },
-                child: Text('Play'),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
+            GestureDetector(
+              onTap: () {
+                game.startNewGame();
+              },
+              child: Container(
+                width: 200,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.blue,
                 ),
+                child: Center(child: Text('Play')),
               ),
             ),
             SizedBox(height: 20),
-            Container(
-              width: 200,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  //Navigator.of(context).pushNamed(SettingsMenu.id);
-                },
-                child: Text('Settings'),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
+            GestureDetector(
+              onTap: () {
+                //Navigator.of(context).pushNamed(SettingsMenu.id);
+              },
+              child: Container(
+                width: 200,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.blue,
                 ),
+                child: Center(child: Text('Settings')),
               ),
             ),
           ],

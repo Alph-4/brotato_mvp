@@ -21,10 +21,12 @@ class Player extends SpriteAnimationComponent
   late SpriteAnimation astronautRight;
   late SpriteAnimation astronautLeft;
   late SpriteAnimation astronautUp;
-  late final HealthBar healthBar = HealthBar();
-  late final ExpBar expBar = ExpBar();
+
+  final LifeAndExpBar lifeAndExpBar = LifeAndExpBar();
+
 
   int health = 100;
+  int exp = 0;
 
   @override
   FutureOr<void> onLoad() async {
@@ -55,7 +57,7 @@ class Player extends SpriteAnimationComponent
 
   void takeDamage(int damage) {
     health -= damage;
-    healthBar.updateHealth(health.toDouble());
+    lifeAndExpBar.updateHealth(health.toDouble());
     if (health <= 0) {
       game.onPlayerDeath();
     }
@@ -100,18 +102,23 @@ class Player extends SpriteAnimationComponent
     position.y = position.y.clamp(0, game.size.y - size.y);
   }
 }
-
-class HealthBar extends PositionComponent {
+class LifeAndExpBar extends PositionComponent {
   double health = 100; // valeur initiale de la vie
   double maxWidth = 100; // largeur maximale de la barre de vie
+  double exp = 0; // valeur initiale de la vie
+  double maxExp = 100; // largeur maximale de la barre de vie
 
-  HealthBar() {
+  LifeAndExpBar() {
     width = maxWidth;
-    height = 20;
+    height = 40;
   }
 
   void updateHealth(double newHealth) {
     health = newHealth;
+  }
+
+  void updateExp(double newExp) {
+    exp = newExp;
   }
 
   @override
@@ -138,34 +145,15 @@ class HealthBar extends PositionComponent {
         marginTop + (height - textPainter.height) / 2,
       ),
     );
-  }
-}
 
-class ExpBar extends PositionComponent {
-  double exp = 0; // valeur initiale de la vie
-  double maxExp = 10; // largeur maximale de la barre de vie
-
-  ExpBar() {
-    width = maxExp;
-    height = 20;
-  }
-
-  void updateExp(double newExp) {
-    exp = newExp;
-  }
-
-  @override
-  void render(Canvas canvas) {
-    double marginTop = 0; // add margin top
-    double marginLeft = 0; // add margin left
-
-    // Dessinez la barre de vie
-    canvas.drawRect(Rect.fromLTWH(marginLeft, marginTop, width, height),
+    // Dessinez la barre d'expérience
+    canvas.drawRect(Rect.fromLTWH(marginLeft, marginTop + 20, width, height),
         Paint()..color = const Color.fromARGB(255, 54, 95, 244));
 
     // Dessinez la quantité de vie restante
     canvas.drawRect(
-        Rect.fromLTWH(marginLeft, marginTop, exp / 100 * maxExp, height),
+        Rect.fromLTWH(marginLeft, marginTop + 20, exp / 100 * maxExp, height),
         Paint()..color = Colors.green);
   }
 }
+

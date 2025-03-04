@@ -61,8 +61,7 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
     player = Player();
     player.position = size / 2;
     add(player);
-    add(player.healthBar);
-    add(player.expBar);
+    add(player.lifeAndExpBar);
 
     // Démarrer le spawn des ennemis et le tir automatique
     startSpawningEnemies();
@@ -158,7 +157,7 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
     children.whereType<Enemy>().forEach(remove);
     children.whereType<Bullet>().forEach(remove);
     player.removeFromParent();
-    player.healthBar.removeFromParent();
+    player.lifeAndExpBar.removeFromParent();
   }
 
   @override
