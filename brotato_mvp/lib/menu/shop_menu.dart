@@ -1,10 +1,11 @@
-import 'package:brotato_mvp/game.dart';
-import 'package:brotato_mvp/main.dart';
+
+
 import 'package:flutter/material.dart';
+import 'package:space_botato/game.dart';
 
 class ShopMenu extends StatelessWidget {
   static const id = 'ShopID';
-  final BrotatoGame game;
+  final SpaceBotatoGame game;
   const ShopMenu({super.key, required this.game});
 
   @override

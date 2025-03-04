@@ -1,16 +1,15 @@
 import 'dart:async';
 import 'dart:ui';
-
-import 'package:brotato_mvp/enemy.dart';
-import 'package:brotato_mvp/game.dart';
-import 'package:brotato_mvp/main.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
+import 'package:space_botato/enemy.dart';
+import 'package:space_botato/game.dart';
+import 'package:space_botato/main.dart';
 
 class Player extends SpriteAnimationComponent
-    with HasGameRef<BrotatoGame>, CollisionCallbacks {
+    with HasGameRef<SpaceBotatoGame>, CollisionCallbacks {
   Player() : super(size: Vector2(64, 104)) {
     {
       add(RectangleHitbox()..size = Vector2(50, 50));

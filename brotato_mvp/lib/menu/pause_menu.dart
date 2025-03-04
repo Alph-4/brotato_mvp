@@ -1,10 +1,9 @@
-import 'package:brotato_mvp/game.dart';
-import 'package:brotato_mvp/main.dart';
 import 'package:flutter/material.dart';
+import 'package:space_botato/game.dart';
 
 class PauseMenu extends StatelessWidget {
   static const id = 'PauseID';
-  final BrotatoGame game;
+  final SpaceBotatoGame game;
   const PauseMenu({super.key, required this.game});
 
   @override

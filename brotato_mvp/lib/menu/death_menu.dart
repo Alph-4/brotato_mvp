@@ -1,10 +1,9 @@
-import 'package:brotato_mvp/game.dart';
-import 'package:brotato_mvp/main.dart';
 import 'package:flutter/material.dart';
+import 'package:space_botato/game.dart';
 
 class DeathMenu extends StatelessWidget {
   static const id = 'DeathID';
-  final BrotatoGame game;
+  final SpaceBotatoGame game;
   const DeathMenu({super.key, required this.game});
 
   @override

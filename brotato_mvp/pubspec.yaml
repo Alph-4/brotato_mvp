@@ -1,5 +1,5 @@
-name: brotato_mvp
-description: "A new Flutter project."
+name: space_botato
+description: "Roguelike game made with Flutter and Flame"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -45,13 +45,13 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.
 flutter_native_splash:
+  orientation: landscape
   color: "#000000"
   image: assets/images/splash_screen.png
   android: true
   ios: true
 
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

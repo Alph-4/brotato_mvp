@@ -1,6 +1,6 @@
 {
-    "name": "brotato_mvp",
-    "short_name": "brotato_mvp",
+    "name": "Botato",
+    "short_name": "Botato",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#hexcode",

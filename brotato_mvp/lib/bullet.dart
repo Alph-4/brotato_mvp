@@ -1,13 +1,9 @@
-import 'package:brotato_mvp/game.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'dart:math';
-import 'dart:async' as da;
-import 'package:brotato_mvp/main.dart';
 import 'package:flame/components.dart';
-import 'package:flame/sprite.dart';
+import 'package:space_botato/game.dart';
 
-class Bullet extends SpriteComponent with HasGameReference<BrotatoGame> {
+class Bullet extends SpriteComponent with HasGameReference<SpaceBotatoGame> {
   final Vector2 direction;
   Bullet({required this.direction}) : super(size: Vector2(20, 20));
 

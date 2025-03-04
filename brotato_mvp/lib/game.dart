@@ -1,19 +1,20 @@
 
-import 'package:brotato_mvp/main.dart';
 import 'package:flame/components.dart';
 import 'dart:math';
-import 'package:brotato_mvp/bullet.dart';
-import 'package:brotato_mvp/enemy.dart';
-import 'package:brotato_mvp/menu/death_menu.dart';
-import 'package:brotato_mvp/menu/main_menu.dart';
-import 'package:brotato_mvp/menu/pause_menu.dart';
-import 'package:brotato_mvp/menu/shop_menu.dart';
-import 'package:brotato_mvp/player.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:flame/flame.dart';
+import 'package:space_botato/bullet.dart';
+import 'package:space_botato/enemy.dart';
 import 'dart:async' as da;
-class BrotatoGame extends FlameGame with HasCollisionDetection {
+
+import 'package:space_botato/main.dart';
+import 'package:space_botato/menu/death_menu.dart';
+import 'package:space_botato/menu/main_menu.dart';
+import 'package:space_botato/menu/pause_menu.dart';
+import 'package:space_botato/menu/shop_menu.dart';
+import 'package:space_botato/player.dart';
+class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
 
   GameState state = GameState.menu;
   late Player player;

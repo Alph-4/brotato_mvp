@@ -1,11 +1,10 @@
-import 'package:brotato_mvp/game.dart';
-import 'package:brotato_mvp/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:space_botato/game.dart';
 
 class MainMenu extends StatelessWidget {
   static const id = 'MainID';
-  final BrotatoGame game;
+  final SpaceBotatoGame game;
   const MainMenu({super.key, required this.game});
 
   @override
@@ -20,19 +19,43 @@ class MainMenu extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                game.startNewGame();
-                //Navigator.of(context).pushNamed(BrotatoGame.id);
-              },
-              child: Text('Play'),
+            Container(
+              width: 200,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  game.startNewGame();
+                  //Navigator.of(context).pushNamed(SpaceBotatoGame.id);
+                },
+                child: Text('Play'),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+              ),
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                //Navigator.of(context).pushNamed(SettingsMenu.id);
-              },
-              child: Text('Settings'),
+            Container(
+              width: 200,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  //Navigator.of(context).pushNamed(SettingsMenu.id);
+                },
+                child: Text('Settings'),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

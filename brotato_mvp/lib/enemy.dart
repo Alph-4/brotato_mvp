@@ -1,17 +1,12 @@
-import 'dart:math';
-import 'dart:async' as da;
-import 'package:brotato_mvp/bullet.dart';
-import 'package:brotato_mvp/game.dart';
-import 'package:brotato_mvp/main.dart';
-import 'package:brotato_mvp/player.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flame/particles.dart';
-import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
+import 'package:space_botato/bullet.dart';
+import 'package:space_botato/game.dart';
+import 'package:space_botato/player.dart';
 
 abstract class Enemy extends SpriteComponent
-    with HasGameReference<BrotatoGame>, CollisionCallbacks {
+    with HasGameReference<SpaceBotatoGame>, CollisionCallbacks {
   Enemy() : super(size: Vector2(150, 150)) {
     add(RectangleHitbox()..size = Vector2(50, 50));
   }

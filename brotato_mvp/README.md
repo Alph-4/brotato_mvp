@@ -1,4 +1,4 @@
-# brotato_mvp
+# Botato
 
 A new Flutter project.
 

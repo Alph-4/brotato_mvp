@@ -1,4 +1,4 @@
-package com.example.brotato_mvp
+package com.example.Botato
 
 import io.flutter.embedding.android.FlutterActivity
 
