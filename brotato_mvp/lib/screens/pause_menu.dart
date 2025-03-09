@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:space_botato/game.dart';
+import 'package:space_botato/core/game.dart';
 
 class PauseMenu extends StatelessWidget {
   static const id = 'PauseID';

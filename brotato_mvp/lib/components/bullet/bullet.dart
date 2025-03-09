@@ -1,7 +1,7 @@
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/components.dart';
-import 'package:space_botato/game.dart';
+import 'package:space_botato/core/game.dart';
 
 class Bullet extends SpriteComponent with HasGameReference<SpaceBotatoGame> {
   final Vector2 direction;

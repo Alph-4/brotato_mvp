@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:space_botato/game.dart';
+import 'package:space_botato/core/game.dart';
 
 class MainMenu extends StatelessWidget {
   static const id = 'MainID';

@@ -4,9 +4,10 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
-import 'package:space_botato/enemy.dart';
-import 'package:space_botato/game.dart';
+import 'package:space_botato/components/enemy/enemy.dart';
+import 'package:space_botato/core/game.dart';
 import 'package:space_botato/main.dart';
+import 'package:space_botato/components/hud/hud.dart';
 
 class Player extends SpriteAnimationComponent
     with HasGameRef<SpaceBotatoGame>, CollisionCallbacks {
@@ -22,16 +23,21 @@ class Player extends SpriteAnimationComponent
   late SpriteAnimation astronautLeft;
   late SpriteAnimation astronautUp;
 
-  final LifeAndExpBar lifeAndExpBar = LifeAndExpBar();
+  double health = 100;
+  double maxHealth = 100;
+  double exp = 0;
+  double maxExp = 100;
 
-
-  int health = 100;
-  int exp = 0;
+  late final GameHUD hud;
 
   @override
   FutureOr<void> onLoad() async {
     await loadPlayer();
-
+    
+    // Initialiser et ajouter le HUD
+    hud = GameHUD();
+    game.add(hud);
+    
     return super.onLoad();
   }
 
@@ -46,7 +52,7 @@ class Player extends SpriteAnimationComponent
     astronautRight = spriteSheet.createAnimation(row: 1, stepTime: 0.1, to: 8);
     astronautUp = spriteSheet.createAnimation(row: 2, stepTime: 0.1, to: 8);
     astronautLeft = SpriteAnimation(
-      astronautRight.frames.reversed.toList(), // Inversion des frames
+      astronautRight.frames.reversed.toList(),
     );
     animation = spriteSheet.createAnimation(row: 0, stepTime: 0.1, to: 1);
     size = Vector2(64, 104);
@@ -57,10 +63,19 @@ class Player extends SpriteAnimationComponent
 
   void takeDamage(int damage) {
     health -= damage;
-    lifeAndExpBar.updateHealth(health.toDouble());
+    hud.updateHealth(health);
     if (health <= 0) {
       game.onPlayerDeath();
     }
+  }
+
+  void gainExp(double amount) {
+    exp += amount;
+    if (exp >= maxExp) {
+      // Logique de niveau supérieur ici
+      exp = 0;
+    }
+    hud.updateExp(exp);
   }
 
   @override
@@ -82,7 +97,6 @@ class Player extends SpriteAnimationComponent
     }
 
     if (game.joystick.direction != JoystickDirection.idle) {
-      // Gestion des animations
       if (game.joystick.relativeDelta.x.abs() >
           game.joystick.relativeDelta.y.abs()) {
         if (game.joystick.relativeDelta.x > 0) {
@@ -102,6 +116,7 @@ class Player extends SpriteAnimationComponent
     position.y = position.y.clamp(0, game.size.y - size.y);
   }
 }
+
 class LifeAndExpBar extends PositionComponent {
   double health = 100; // valeur initiale de la vie
   double maxWidth = 100; // largeur maximale de la barre de vie

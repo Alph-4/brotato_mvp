@@ -1,19 +1,21 @@
-
 import 'package:flame/components.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:flame/flame.dart';
-import 'package:space_botato/bullet.dart';
-import 'package:space_botato/enemy.dart';
+import 'package:space_botato/components/bullet/bullet.dart';
+import 'package:space_botato/components/enemy/enemy.dart';
+import 'package:space_botato/components/enemy/weak_enemy.dart';
 import 'dart:async' as da;
 
 import 'package:space_botato/main.dart';
-import 'package:space_botato/menu/death_menu.dart';
-import 'package:space_botato/menu/main_menu.dart';
-import 'package:space_botato/menu/pause_menu.dart';
-import 'package:space_botato/menu/shop_menu.dart';
-import 'package:space_botato/player.dart';
+
+import 'package:space_botato/components/player/player.dart';
+import 'package:space_botato/screens/death_menu.dart';
+import 'package:space_botato/screens/main_menu.dart';
+import 'package:space_botato/screens/pause_menu.dart';
+import 'package:space_botato/screens/shop_menu.dart';
+
 class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
 
   GameState state = GameState.menu;
@@ -61,7 +63,6 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
     player = Player();
     player.position = size / 2;
     add(player);
-    add(player.lifeAndExpBar);
 
     // Démarrer le spawn des ennemis et le tir automatique
     startSpawningEnemies();
@@ -157,7 +158,6 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
     children.whereType<Enemy>().forEach(remove);
     children.whereType<Bullet>().forEach(remove);
     player.removeFromParent();
-    player.lifeAndExpBar.removeFromParent();
   }
 
   @override
@@ -177,3 +177,10 @@ final buttonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.blueGrey[800],
   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
 );
+
+final gameOverlays = {
+  MainMenu.id: (context, game) => MainMenu(game: game),
+  PauseMenu.id: (context, game) => PauseMenu(game: game),
+  DeathMenu.id: (context, game) => DeathMenu(game: game),
+  ShopMenu.id: (context, game) => ShopMenu(game: game),
+};
