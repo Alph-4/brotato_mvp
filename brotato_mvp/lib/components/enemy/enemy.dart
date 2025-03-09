@@ -5,11 +5,12 @@ import 'package:space_botato/components/bullet/bullet.dart';
 import 'package:space_botato/components/player/player.dart';
 import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/game.dart';
+import 'package:space_botato/main.dart';
 
-abstract class Enemy extends SpriteComponent
+abstract class Enemy extends SpriteAnimationComponent
     with HasGameReference<SpaceBotatoGame>, CollisionCallbacks {
   Enemy() : super(size: Vector2(kEnemySize, kEnemySize)) {
-    add(RectangleHitbox()..size = Vector2(kEnemyHitboxSize, kEnemyHitboxSize));
+    anchor = Anchor.center;
   }
 
   late ShapeHitbox hitbox;
@@ -43,6 +44,7 @@ abstract class Enemy extends SpriteComponent
       other.removeFromParent();
       removeFromParent();
       game.enemies.remove(this);
+ 
     } else if (other is Player) {
       hitbox.paint.color = _collisionPlayerHitColor;
     } else if (other is Enemy) {

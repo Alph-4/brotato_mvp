@@ -55,7 +55,7 @@ class Player extends SpriteAnimationComponent
       astronautRight.frames.reversed.toList(),
     );
     animation = spriteSheet.createAnimation(row: 0, stepTime: 0.1, to: 1);
-    size = Vector2(64, 104);
+    size = Vector2(32, 52);
     anchor = Anchor.center;
 
     add(RectangleHitbox()..collisionType = CollisionType.passive);
@@ -78,6 +78,12 @@ class Player extends SpriteAnimationComponent
     hud.updateExp(exp);
   }
 
+  void reset() {
+    health = maxHealth;
+    exp = 0;
+    hud.updateHealth(health);
+    hud.updateExp(exp);
+  }
   @override
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {

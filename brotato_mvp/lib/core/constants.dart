@@ -21,8 +21,8 @@ const kPlayerSize = 64.0;
 const kPlayerHitboxSize = 50.0;
 
 // Configuration des ennemis
-const kEnemySize = 150.0;
-const kEnemyHitboxSize = 50.0;
+const kEnemySize = 100.0;
+const kEnemyHitboxSize = 25.0;
 const kEnemySpeed = 250.0;
 const kEnemyBaseDamage = 1;
 
@@ -39,3 +39,4 @@ const kHudCornerRadius = 5.0;
 // Configuration du jeu
 const kEnemiesPerWave = 5;
 const kMaxSpawnDelay = 5; 
+const kMaxWave = 3;

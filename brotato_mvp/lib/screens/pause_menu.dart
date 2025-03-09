@@ -14,23 +14,33 @@ class PauseMenu extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'PAUSED',
-              style: textStyle,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: buttonStyle,
-              onPressed: () => game.resumeGame(),
-              child: const Text('Resume'),
+            GestureDetector(
+              onTap: () => game.resumeGame(),
+              child: Container(
+                width: 200,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.blue,
+                ),
+                child: Center(child: Text('Resume')),
+              ),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              style: buttonStyle,
-              onPressed: () {
+            GestureDetector(
+              onTap: () {
+                game.resetGame();
                 game.showMainMenu();
               },
-              child: const Text('Main Menu'),
+              child: Container(
+                width: 200,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.blue,
+                ),
+                child: Center(child: Text('Main Menu')),
+              ),
             ),
           ],
         ),

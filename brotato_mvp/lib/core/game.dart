@@ -1,11 +1,12 @@
 import 'package:flame/components.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:flame/flame.dart';
 import 'package:space_botato/components/bullet/bullet.dart';
 import 'package:space_botato/components/enemy/enemy.dart';
-import 'package:space_botato/components/enemy/weak_enemy.dart';
+import 'package:space_botato/components/enemy/flying_enemy.dart';
 import 'dart:async' as da;
 
 import 'package:space_botato/main.dart';
@@ -15,6 +16,7 @@ import 'package:space_botato/screens/death_menu.dart';
 import 'package:space_botato/screens/main_menu.dart';
 import 'package:space_botato/screens/pause_menu.dart';
 import 'package:space_botato/screens/shop_menu.dart';
+import 'package:space_botato/screens/settings_button.dart';
 
 class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
 
@@ -32,7 +34,7 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
 
     // Initialisation du joystick
     joystick = JoystickComponent(
-      knob: CircleComponent(radius: 20, paint: Paint()..color = Colors.red),
+      knob: CircleComponent(radius: 20, paint: Paint()..color = Colors.grey),
       background: CircleComponent(
         radius: 60,
         paint: Paint()..color = Colors.grey.withAlpha(50),
@@ -50,21 +52,21 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
   }
 
   void startNewGame() {
-    state = GameState.playing;
-    overlays.remove(MainMenu.id);
-    wave = 1;
-
-    // Réinitialiser le jeu
     enemies.clear();
     children.whereType<Enemy>().forEach(remove);
     children.whereType<Bullet>().forEach(remove);
 
-    // Créer et ajouter le joueur
+    wave = 1;
+
     player = Player();
     player.position = size / 2;
     add(player);
 
-    // Démarrer le spawn des ennemis et le tir automatique
+    overlays.remove(MainMenu.id);
+
+      state = GameState.playing;
+    overlays.add(SettingsButton.id);
+
     startSpawningEnemies();
     startAutoShoot();
   }
@@ -92,19 +94,26 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
         final direction = (closestEnemy.position - playerPos).normalized();
         final bullet = Bullet(direction: direction);
         bullet.position = player.position;
+        FlameAudio.play('simple_shoot.mp3');
         add(bullet);
       }
     });
   }
 
+  /// Starts spawning [wave * 5] enemies at random intervals between 0 and 5
+  /// seconds. The spawned enemies are added to the [enemies] list.
+  ///
+  /// This is intended to be called when the game starts, or when the player
+  /// reaches a new wave.
   void startSpawningEnemies() {
-    for (int i = 0; i < wave * 5; i++) {
+    var maxEnemies = wave * 5;
+    for (int i = 0; i < maxEnemies; i++) {
       da.Timer(
         Duration(seconds: (Random().nextDouble() * 5).toInt()),
         () {
           if (state != GameState.playing) return;
 
-          final enemy = WeakEnemy();
+          final enemy = FlyingEnemy();
           enemy.position = Vector2(
             Random().nextDouble() * size.x,
             Random().nextDouble() * size.y,
@@ -119,12 +128,31 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
   void pauseGame() {
     state = GameState.paused;
     pauseEngine();
+    overlays.remove(SettingsButton.id);
     overlays.add(PauseMenu.id);
+  }
+
+  void resetGame() {
+    pauseEngine();
+    enemies.clear();
+    children.whereType<Enemy>().forEach(remove);
+    children.whereType<Bullet>().forEach(remove);
+    // Supprimer le joueur actuel
+      player.removeFromParent();
+    // Retirer tous les overlays de jeu
+    overlays.clear();
+    // Réinitialiser l'état
+    state = GameState.menu;
+    // Afficher le menu principal
+    showMainMenu();
+    // Redémarrer le moteur de jeu
+    resumeEngine();
   }
 
   void resumeGame() {
     state = GameState.playing;
     overlays.remove(PauseMenu.id);
+    overlays.add(SettingsButton.id);
     resumeEngine();
   }
 
@@ -163,6 +191,7 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
   @override
   void update(double dt) {
     if (state != GameState.playing) return;
+
     super.update(dt);
   }
 }
@@ -183,4 +212,5 @@ final gameOverlays = {
   PauseMenu.id: (context, game) => PauseMenu(game: game),
   DeathMenu.id: (context, game) => DeathMenu(game: game),
   ShopMenu.id: (context, game) => ShopMenu(game: game),
+  SettingsButton.id: (context, game) => SettingsButton(game: game),
 };

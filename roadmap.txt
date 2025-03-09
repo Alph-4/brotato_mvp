@@ -1,0 +1,84 @@
+Roadmap MVP (Minimum Viable Product)
+
+1. Finalisation des mécaniques de base
+    - Gameplay :
+      - Déplacement du joueur, système de tir, détection des collisions, gestion des points de vie.
+      - Implémentation des vagues d'ennemis avec une difficulté progressive.
+    - Contrôles :
+      - Optimisation des contrôles tactiles (et/ou clavier) pour une jouabilité fluide sur mobile.
+
+2. Interface Utilisateur (UI) et expérience (UX)
+    - Menus :
+      - Menu principal (bouton "Jouer", options basiques, présentation rapide du jeu).
+      - Écran de pause et écran de game over avec affichage du score et possibilité de recommencer.
+    - Feedback visuel :
+      - Affichage des points de vie, score, et notifications simples (power-ups, bonus, etc.).
+
+3. Graphismes et son
+    - Assets graphiques :
+      - Utilisation d’assets temporaires ou simples pour représenter le joueur, les ennemis, et l’arrière-plan.
+    - Effets audio :
+      - Sons de tir, d'explosion, et musique de fond minimaliste.
+
+4. Monétisation et analytics
+    - Monétisation :
+      - Intégration de publicités (bannières/interstitiels) pour générer des revenus dès le lancement.
+      - Option de suppression des pubs via un achat in-app (facultatif pour le MVP).
+    - Suivi des performances :
+      - Implémentation d’outils d’analytics pour collecter les feedbacks et suivre l’engagement des joueurs.
+
+5. Tests et publication
+    - QA interne :
+      - Test sur différents appareils pour détecter et corriger les bugs majeurs.
+    - Préparation et soumission :
+      - Préparer les builds pour Android et iOS et soumettre aux stores.
+      - Mettre en place un suivi post-lancement pour recueillir les premiers retours des utilisateurs.
+
+Roadmap évolutive par version
+
+Version 1.1 – Amélioration de la jouabilité et enrichissement du contenu
+    - Gameplay :
+      - Ajout de nouveaux types d'ennemis avec des comportements variés (ex : ennemis rapides, ennemis résistants).
+      - Introduction de boss ou d’ennemis spéciaux en fin de vague pour pimenter la difficulté.
+    - Power-ups et bonus :
+      - Mise en place de power-ups temporaires (augmentation de vitesse, double tir, bouclier).
+    - Effets visuels et animations :
+      - Amélioration des animations, ajout d'effets de particules et d'animations de transition.
+    - Optimisation et équilibrage :
+      - Ajustement de la difficulté et équilibrage des vagues en fonction des retours utilisateurs.
+
+Version 1.2 – Expansion des fonctionnalités et interaction sociale
+    - Système de progression :
+      - Mise en place d'un système de niveaux avec déblocage d'armes ou d’améliorations.
+      - Introduction d’un système de score évolué (points bonus, multiplicateurs).
+    - Fonctionnalités sociales :
+      - Intégration de classements (leaderboards) pour stimuler la compétition.
+      - Ajout de succès/achievements pour valoriser la progression.
+    - Personnalisation :
+      - Options de personnalisation du personnage (skins, accessoires) pour renforcer l'engagement.
+    - Interface et expérience :
+      - Raffinement de l’UI/UX avec des menus plus dynamiques et des transitions soignées.
+
+Version 1.3 – Nouveaux modes de jeu et interactions multijoueurs
+    - Modes alternatifs :
+      - Lancement d’un mode "endless" ou "survival" pour des sessions de jeu prolongées.
+      - Éventuellement, introduction de missions ou défis hebdomadaires.
+    - Multijoueur :
+      - Intégration d’un mode multijoueur (local ou en ligne) pour jouer en coopération ou en compétition.
+    - Optimisation avancée :
+      - Améliorations de performances pour des appareils moins puissants, optimisation de la gestion des ressources.
+    - Feedback communautaire :
+      - Mise en place d’un système de retours et de mises à jour régulières basées sur la communauté.
+
+Version 2.0 – Refonte graphique et expansion majeure
+    - Refonte visuelle :
+      - Mise à jour complète des assets graphiques pour une expérience plus immersive.
+      - Amélioration des animations et effets de lumière.
+    - Mécaniques avancées :
+      - Introduction de nouvelles mécaniques (gestion de ressources, combos, stratégies complexes).
+      - Développement d’une économie in-game avec une boutique proposant des microtransactions (skins, armes, power-ups avancés).
+    - Communauté et événements :
+      - Organisation d’événements en ligne (tournois, défis communautaires).
+      - Mise en place d’interactions sociales (chat en jeu, clubs ou guildes).
+    - Optimisation continue :
+      - Suivi approfondi des données utilisateurs pour adapter régulièrement le jeu aux attentes et besoins de la communauté.
