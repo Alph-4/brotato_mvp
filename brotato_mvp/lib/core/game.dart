@@ -4,10 +4,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:flame/flame.dart';
+import 'package:flutter/services.dart';
 import 'package:space_botato/components/bullet/bullet.dart';
 import 'package:space_botato/components/enemy/enemy.dart';
 import 'package:space_botato/components/enemy/flying_enemy.dart';
 import 'dart:async' as da;
+import 'package:flame/input.dart';
+import 'package:space_botato/components/enemy/mushroom_enemy.dart';
+import 'package:space_botato/core/constants.dart';
 
 import 'package:space_botato/main.dart';
 
@@ -17,14 +21,17 @@ import 'package:space_botato/screens/main_menu.dart';
 import 'package:space_botato/screens/pause_menu.dart';
 import 'package:space_botato/screens/shop_menu.dart';
 import 'package:space_botato/screens/settings_button.dart';
+import 'package:space_botato/screens/win_screen.dart';
 
-class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
+class SpaceBotatoGame extends FlameGame with HasCollisionDetection, KeyboardEvents {
 
   GameState state = GameState.menu;
   late Player player;
   late JoystickComponent joystick;
   List<Enemy> enemies = [];
   int wave = 1;
+  bool waveCompleted = false;
+  
 
   @override
   Future<void> onLoad() async {
@@ -94,7 +101,7 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
         final direction = (closestEnemy.position - playerPos).normalized();
         final bullet = Bullet(direction: direction);
         bullet.position = player.position;
-        FlameAudio.play('simple_shoot.mp3');
+        //FlameAudio.play('simple_shoot.mp3');
         add(bullet);
       }
     });
@@ -106,23 +113,35 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
   /// This is intended to be called when the game starts, or when the player
   /// reaches a new wave.
   void startSpawningEnemies() {
-    var maxEnemies = wave * 5;
+    var maxEnemies = wave * Random().nextInt(3) + 2;
     for (int i = 0; i < maxEnemies; i++) {
       da.Timer(
-        Duration(seconds: (Random().nextDouble() * 5).toInt()),
+        Duration(seconds: (Random().nextDouble() * kMaxSpawnDelay).toInt()),
         () {
           if (state != GameState.playing) return;
 
           final enemy = FlyingEnemy();
+        
           enemy.position = Vector2(
             Random().nextDouble() * size.x,
             Random().nextDouble() * size.y,
           );
+
+          if(wave == 2 || wave == 3){
+            final enemy = MushroomEnemy();
+            enemy.position = Vector2(
+              Random().nextDouble() * size.x,
+              Random().nextDouble() * size.y,
+            );
+            add(enemy);
+            enemies.add(enemy);
+          }
           add(enemy);
           enemies.add(enemy);
         },
       );
     }
+    waveCompleted = true;
   }
 
   void pauseGame() {
@@ -161,6 +180,13 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
     overlays.add(DeathMenu.id);
   }
 
+  void returnToMainMenu() {
+    state = GameState.menu;
+    overlays.clear();
+    overlays.add(MainMenu.id);
+    resetGame();
+  }
+
   void showShopMenu() {
     state = GameState.shopping;
     pauseEngine();
@@ -188,29 +214,49 @@ class SpaceBotatoGame extends FlameGame with HasCollisionDetection {
     player.removeFromParent();
   }
 
+
   @override
   void update(double dt) {
     if (state != GameState.playing) return;
+    print("enemies.length: ${enemies.length}");
+    print("current wave: $wave");
 
+    if(waveCompleted && enemies.isEmpty && wave < kMaxWaves){
+      print("wave completed, showing shop");
+      state = GameState.shopping;
+      pauseEngine();
+      overlays.add(ShopMenu.id);
+    }
+    if(waveCompleted && enemies.isEmpty && wave == kMaxWaves){
+      print("Win");
+      state = GameState.win;
+      overlays.add(WinScreen.id);
+    }
     super.update(dt);
   }
+
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
+      player.position.x -= 450 * 0.016; // dt approximatif
+    }
+    if (keysPressed.contains(LogicalKeyboardKey.arrowRight)) {
+      player.position.x += 450 * 0.016; // dt approximatif
+    }
+    if (keysPressed.contains(LogicalKeyboardKey.arrowUp)) {
+      player.position.y -= 450 * 0.016; // dt approximatif
+    }
+    if (keysPressed.contains(LogicalKeyboardKey.arrowDown)) {
+      player.position.y += 450 * 0.016; // dt approximatif
+    }
+    if(keysPressed.contains(LogicalKeyboardKey.escape)) {
+      pauseGame();
+    }
+    
+    return KeyEventResult.handled;
+  
+
+  }
+
 }
 
-const textStyle = TextStyle(
-  color: Colors.white,
-  fontSize: 24,
-  fontWeight: FontWeight.bold,
-);
 
-final buttonStyle = ElevatedButton.styleFrom(
-  backgroundColor: Colors.blueGrey[800],
-  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-);
-
-final gameOverlays = {
-  MainMenu.id: (context, game) => MainMenu(game: game),
-  PauseMenu.id: (context, game) => PauseMenu(game: game),
-  DeathMenu.id: (context, game) => DeathMenu(game: game),
-  ShopMenu.id: (context, game) => ShopMenu(game: game),
-  SettingsButton.id: (context, game) => SettingsButton(game: game),
-};

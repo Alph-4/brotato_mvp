@@ -1,6 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/game.dart';
 import 'package:space_botato/screens/main_menu.dart';
 import 'package:space_botato/screens/pause_menu.dart';
@@ -16,7 +17,7 @@ enum GameState {
   playing,
   paused,
   dead,
-  shopping,
+  shopping, win,
 }
 
 final _game = SpaceBotatoGame();

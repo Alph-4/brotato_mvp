@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/game.dart';
 
 class DeathMenu extends StatelessWidget {
@@ -16,17 +17,17 @@ class DeathMenu extends StatelessWidget {
           children: [
             Text(
               'GAME OVER',
-              style: textStyle,
+              style: kTextStyle,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              style: buttonStyle,
+              style: kButtonStyle,
               onPressed: () => game.startNewGame(),
               child: const Text('Try Again'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
-              style: buttonStyle,
+              style: kButtonStyle,
               onPressed: () => game.showMainMenu(),
               child: const Text('Main Menu'),
             ),

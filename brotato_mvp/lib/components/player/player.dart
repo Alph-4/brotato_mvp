@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/input.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
 import 'package:space_botato/components/enemy/enemy.dart';
+import 'package:space_botato/components/player/player_animations.dart';
 import 'package:space_botato/core/game.dart';
 import 'package:space_botato/main.dart';
 import 'package:space_botato/components/hud/hud.dart';
@@ -47,14 +49,14 @@ class Player extends SpriteAnimationComponent
       srcSize: Vector2(32, 52),
     );
 
-    astronautIdle = spriteSheet.createAnimation(row: 0, stepTime: 0.1, to: 1);
-    astronautDown = spriteSheet.createAnimation(row: 0, stepTime: 0.1, to: 8);
-    astronautRight = spriteSheet.createAnimation(row: 1, stepTime: 0.1, to: 8);
-    astronautUp = spriteSheet.createAnimation(row: 2, stepTime: 0.1, to: 8);
-    astronautLeft = SpriteAnimation(
-      astronautRight.frames.reversed.toList(),
-    );
-    animation = spriteSheet.createAnimation(row: 0, stepTime: 0.1, to: 1);
+    final playerAnimations = PlayerAnimations();
+    await playerAnimations.load(spriteSheet);
+    astronautIdle = playerAnimations.idle;
+    astronautDown = playerAnimations.down;
+    astronautRight = playerAnimations.right;
+    astronautUp = playerAnimations.up;
+    astronautLeft = playerAnimations.left;
+    animation = playerAnimations.idle;
     size = Vector2(32, 52);
     anchor = Anchor.center;
 
@@ -65,7 +67,7 @@ class Player extends SpriteAnimationComponent
     health -= damage;
     hud.updateHealth(health);
     if (health <= 0) {
-      game.onPlayerDeath();
+     // game.onPlayerDeath();
     }
   }
 
@@ -96,6 +98,7 @@ class Player extends SpriteAnimationComponent
   @override
   void update(double dt) {
     super.update(dt);
+    
     if (game.state != GameState.playing) return;
 
     if (game.joystick.direction != JoystickDirection.idle) {
