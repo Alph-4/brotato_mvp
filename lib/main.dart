@@ -45,16 +45,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Space Botato',
       theme: ThemeData.dark(),
-      home: SafeArea(
-        child: Scaffold(
-          body: SafeArea(
-            child: RiverpodAwareGameWidget(
-              key: gameWidgetKey,
-              game: gameInstance,
-              initialActiveOverlays: const [MainMenu.id],
-              overlayBuilderMap: gameOverlays,
-            ),
-          ),
+      home: Scaffold(
+        body: RiverpodAwareGameWidget(
+          key: gameWidgetKey,
+          game: gameInstance,
+          initialActiveOverlays: const [MainMenu.id],
+          overlayBuilderMap: gameOverlays,
         ),
       ),
     ));
