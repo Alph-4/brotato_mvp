@@ -1,14 +1,25 @@
 import 'package:flame/game.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/game.dart';
+import 'package:space_botato/core/providers.dart';
+import 'package:space_botato/core/shared_preferences.dart';
 import 'package:space_botato/screens/main_menu.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  final prefs = await SharedPreferences
+      .getInstance(); // charger avant runApp :contentReference[oaicite:9]{index=9}
+
+  runApp(
+    ProviderScope(overrides: [
+      sharedPreferencesProvider.overrideWith((ref) async => prefs),
+    ], child: MyApp()),
+  );
 }
 
 enum GameState {
@@ -20,7 +31,9 @@ enum GameState {
   win,
 }
 
-final _game = SpaceBotatoGame();
+final gameInstance = SpaceBotatoGame();
+final GlobalKey<RiverpodAwareGameWidgetState> gameWidgetKey =
+    GlobalKey<RiverpodAwareGameWidgetState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -34,10 +47,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark(),
       home: SafeArea(
         child: Scaffold(
-          body: GameWidget<SpaceBotatoGame>(
-            game: kDebugMode ? SpaceBotatoGame() : _game,
-            overlayBuilderMap: gameOverlays,
-            initialActiveOverlays: const [MainMenu.id],
+          body: SafeArea(
+            child: RiverpodAwareGameWidget(
+              key: gameWidgetKey,
+              game: gameInstance,
+              initialActiveOverlays: const [MainMenu.id],
+              overlayBuilderMap: gameOverlays,
+            ),
           ),
         ),
       ),

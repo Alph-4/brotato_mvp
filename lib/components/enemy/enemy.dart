@@ -6,7 +6,6 @@ import 'package:space_botato/components/enemy/mushroom_enemy.dart';
 import 'package:space_botato/components/player/player.dart';
 import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/game.dart';
-import 'package:space_botato/main.dart';
 import 'package:space_botato/components/enemy/flying_enemy.dart';
 
 abstract class Enemy extends SpriteAnimationComponent
@@ -20,14 +19,12 @@ abstract class Enemy extends SpriteAnimationComponent
 
   final _defaultColor = Colors.cyan;
   final _collisionStartColor = Colors.amber;
-  final _collisionBulletHitColor = Colors.red;
   final _collisionPlayerHitColor = Colors.pink;
 
   @override
   void update(double dt) {
     if (game.player != null) {
-      final playerPos = game.player.position;
-      //moveTowardsPlayer(playerPos, dt);
+      //moveTowardsPlayer(game.player.position, dt);
     }
     super.update(dt);
   }
@@ -48,15 +45,14 @@ abstract class Enemy extends SpriteAnimationComponent
         final flyingEnemy = this as FlyingEnemy;
         flyingEnemy.animation = flyingEnemy.animations.death;
         // Wait for the death animation to complete before removing
-        
+
         Future.delayed(Duration(milliseconds: 400), () {
           if (flyingEnemy.isMounted) {
             flyingEnemy.removeFromParent();
             game.enemies.remove(flyingEnemy);
           }
         });
-      }
-      else if (this is MushroomEnemy) {
+      } else if (this is MushroomEnemy) {
         final mushroomEnemy = this as MushroomEnemy;
         mushroomEnemy.animation = mushroomEnemy.animations.death;
         Future.delayed(Duration(milliseconds: 600), () {
@@ -65,8 +61,7 @@ abstract class Enemy extends SpriteAnimationComponent
             game.enemies.remove(mushroomEnemy);
           }
         });
-      }
-      else {
+      } else {
         removeFromParent();
         game.enemies.remove(this);
       }
@@ -82,4 +77,4 @@ abstract class Enemy extends SpriteAnimationComponent
     super.onCollisionEnd(other);
     hitbox.paint.color = _defaultColor;
   }
-} 
+}

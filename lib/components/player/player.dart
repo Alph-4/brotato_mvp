@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flame/input.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +13,7 @@ import 'package:space_botato/components/hud/hud.dart';
 
 class Player extends SpriteAnimationComponent
     with
-        HasGameRef<SpaceBotatoGame>,
+        HasGameReference<SpaceBotatoGame>,
         CollisionCallbacks,
         RiverpodComponentMixin {
   Player() : super(size: Vector2(64, 104)) {
@@ -105,8 +103,9 @@ class Player extends SpriteAnimationComponent
   void update(double dt) {
     super.update(dt);
 
-    if (ref.watch(gameStateProvider.notifier).state != GameState.playing)
+    if (ref.watch(gameStateProvider.notifier).state != GameState.playing) {
       return;
+    }
 
     if (game.joystick.direction != JoystickDirection.idle) {
       position.add(game.joystick.relativeDelta * 450 * dt);

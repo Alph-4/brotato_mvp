@@ -1,22 +1,18 @@
-import 'package:flame/components.dart';
-import 'package:flame_audio/flame_audio.dart';
-import 'package:flame_riverpod/flame_riverpod.dart';
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flame/flame.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:space_botato/components/bullet/bullet.dart';
 import 'package:space_botato/components/enemy/enemy.dart';
 import 'package:space_botato/components/enemy/flying_enemy.dart';
 import 'dart:async' as da;
-import 'package:flame/input.dart';
 import 'package:space_botato/components/enemy/mushroom_enemy.dart';
 import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/providers.dart';
-
 import 'package:space_botato/main.dart';
-
 import 'package:space_botato/components/player/player.dart';
 import 'package:space_botato/screens/death_menu.dart';
 import 'package:space_botato/screens/main_menu.dart';
@@ -25,8 +21,7 @@ import 'package:space_botato/screens/shop_menu.dart';
 import 'package:space_botato/screens/settings_button.dart';
 import 'package:space_botato/screens/win_screen.dart';
 
-class SpaceBotatoGame extends FlameGame
-    with HasCollisionDetection, KeyboardEvents, RiverpodGameMixin {
+class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
   late Player player;
   late JoystickComponent joystick;
   List<Enemy> enemies = [];
@@ -35,8 +30,11 @@ class SpaceBotatoGame extends FlameGame
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    await Flame.device.setLandscape();
-    await Flame.device.fullScreen();
+
+    final prefs = await ref.read(sharedPreferencesProvider.future);
+    // Initialiser les providers avec les valeurs stockées
+    ref.read(waveProvider.notifier).state = prefs.getInt('wave') ?? 1;
+    ref.read(goldProvider.notifier).state = prefs.getInt('gold') ?? 0;
 
     // Initialisation du joystick
     joystick = JoystickComponent(

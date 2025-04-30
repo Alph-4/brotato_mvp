@@ -3,18 +3,18 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:space_botato/core/game.dart';
 
-class GameHUD extends PositionComponent with HasGameRef<SpaceBotatoGame> {
+class GameHUD extends PositionComponent with HasGameReference<SpaceBotatoGame> {
   // Constantes pour la configuration visuelle
   static const double barWidth = 200;
   static const double barHeight = 20;
   static const double padding = 10;
   static const double cornerRadius = 5;
-  
+
   // Valeurs actuelles et maximales
   double _health = 100;
-  double _maxHealth = 100;
+  final double _maxHealth = 100;
   double _exp = 0;
-  double _maxExp = 100;
+  final double _maxExp = 100;
 
   // Valeurs pour l'animation fluide
   double _displayedHealth = 100;
@@ -36,7 +36,7 @@ class GameHUD extends PositionComponent with HasGameRef<SpaceBotatoGame> {
   @override
   void update(double dt) {
     super.update(dt);
-    
+
     // Animation fluide des barres
     const animationSpeed = 5.0;
     _displayedHealth += (_health - _displayedHealth) * dt * animationSpeed;
@@ -128,4 +128,4 @@ class GameHUD extends PositionComponent with HasGameRef<SpaceBotatoGame> {
       'EXP',
     );
   }
-} 
+}
