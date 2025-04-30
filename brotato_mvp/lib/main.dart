@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/game.dart';
 import 'package:space_botato/screens/main_menu.dart';
-import 'package:space_botato/screens/pause_menu.dart';
-import 'package:space_botato/screens/shop_menu.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +15,8 @@ enum GameState {
   playing,
   paused,
   dead,
-  shopping, win,
+  shopping,
+  win,
 }
 
 final _game = SpaceBotatoGame();
