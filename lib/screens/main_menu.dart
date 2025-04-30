@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:space_botato/core/game.dart';
+import '../screens/class_selection_screen.dart';
+import '../models/player_class.dart';
 
 class MainMenu extends StatelessWidget {
   static const id = 'MainID';
@@ -36,7 +38,9 @@ class MainMenu extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        game.startNewGame();
+                        //game.startNewGame();
+
+                        game.classSelection();
                       },
                       child: Container(
                         width: 200,

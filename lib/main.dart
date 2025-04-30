@@ -29,6 +29,8 @@ enum GameState {
   dead,
   shopping,
   win,
+  settings,
+  classSelection,
 }
 
 final gameInstance = SpaceBotatoGame();

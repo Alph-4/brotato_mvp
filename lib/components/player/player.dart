@@ -10,16 +10,20 @@ import 'package:space_botato/core/game.dart';
 import 'package:space_botato/core/providers.dart';
 import 'package:space_botato/main.dart';
 import 'package:space_botato/components/hud/hud.dart';
+import 'package:space_botato/models/player_class.dart';
 
 class Player extends SpriteAnimationComponent
     with
         HasGameReference<SpaceBotatoGame>,
         CollisionCallbacks,
         RiverpodComponentMixin {
-  Player() : super(size: Vector2(64, 104)) {
-    {
-      add(RectangleHitbox()..size = Vector2(50, 50));
-    }
+  Player({required this.selectedClass}) : super(size: Vector2(64, 104)) {
+    // Initialize stats based on the selected class
+    health = selectedClass.maxHealth.toDouble();
+    maxHealth = selectedClass.maxHealth.toDouble();
+    selectedClass =
+        selectedClass; // Additional stats like attack and defense can be initialized here if needed
+    add(RectangleHitbox()..size = Vector2(50, 50));
   }
 
   late SpriteAnimation astronautIdle;
@@ -27,6 +31,7 @@ class Player extends SpriteAnimationComponent
   late SpriteAnimation astronautRight;
   late SpriteAnimation astronautLeft;
   late SpriteAnimation astronautUp;
+  late PlayerClassDetails selectedClass;
 
   double health = 100;
   double maxHealth = 100;
@@ -38,10 +43,11 @@ class Player extends SpriteAnimationComponent
   @override
   FutureOr<void> onLoad() async {
     await loadPlayer();
-
-    // Initialiser et ajouter le HUD
+    game.children.whereType<GameHUD>().forEach(game.remove);
     hud = GameHUD();
-    game.add(hud);
+    // Initialiser et ajouter le HUD
+    hud.initAttributes(selectedClass);
+    // game.add(hud);
 
     return super.onLoad();
   }
@@ -84,10 +90,7 @@ class Player extends SpriteAnimationComponent
   }
 
   void reset() {
-    health = maxHealth;
-    exp = 0;
-    hud.updateHealth(health);
-    hud.updateExp(exp);
+    hud.reset();
   }
 
   @override
@@ -108,7 +111,8 @@ class Player extends SpriteAnimationComponent
     }
 
     if (game.joystick.direction != JoystickDirection.idle) {
-      position.add(game.joystick.relativeDelta * 450 * dt);
+      position.add(
+          game.joystick.relativeDelta * (selectedClass.moveSpeed * 400) * dt);
     }
 
     if (game.joystick.direction != JoystickDirection.idle) {
@@ -129,60 +133,5 @@ class Player extends SpriteAnimationComponent
 
     position.x = position.x.clamp(0, game.size.x - size.x);
     position.y = position.y.clamp(0, game.size.y - size.y);
-  }
-}
-
-class LifeAndExpBar extends PositionComponent {
-  double health = 100; // valeur initiale de la vie
-  double maxWidth = 100; // largeur maximale de la barre de vie
-  double exp = 0; // valeur initiale de la vie
-  double maxExp = 100; // largeur maximale de la barre de vie
-
-  LifeAndExpBar() {
-    width = maxWidth;
-    height = 40;
-  }
-
-  void updateHealth(double newHealth) {
-    health = newHealth;
-  }
-
-  void updateExp(double newExp) {
-    exp = newExp;
-  }
-
-  @override
-  void render(Canvas canvas) {
-    double marginTop = 0; // add margin top
-    double marginLeft = 0; // add margin left
-
-    // Dessinez la barre de vie
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: '${health ~/ 1}/${maxWidth ~/ 1}',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-    textPainter.paint(
-      canvas,
-      Offset(
-        marginLeft + (maxWidth - textPainter.width) / 2,
-        marginTop + (height - textPainter.height) / 2,
-      ),
-    );
-
-    // Dessinez la barre d'expérience
-    canvas.drawRect(Rect.fromLTWH(marginLeft, marginTop + 20, width, height),
-        Paint()..color = const Color.fromARGB(255, 54, 95, 244));
-
-    // Dessinez la quantité de vie restante
-    canvas.drawRect(
-        Rect.fromLTWH(marginLeft, marginTop + 20, exp / 100 * maxExp, height),
-        Paint()..color = Colors.green);
   }
 }

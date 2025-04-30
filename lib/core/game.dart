@@ -11,10 +11,14 @@ import 'package:space_botato/components/enemy/enemy.dart';
 import 'package:space_botato/components/enemy/flying_enemy.dart';
 import 'dart:async' as da;
 import 'package:space_botato/components/enemy/mushroom_enemy.dart';
+import 'package:space_botato/components/hud/hud.dart';
 import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/providers.dart';
 import 'package:space_botato/main.dart';
 import 'package:space_botato/components/player/player.dart';
+import 'package:space_botato/models/player_class.dart';
+import 'package:space_botato/overlays/wave_countdown_overlay.dart';
+import 'package:space_botato/screens/class_selection_screen.dart';
 import 'package:space_botato/screens/death_menu.dart';
 import 'package:space_botato/screens/main_menu.dart';
 import 'package:space_botato/screens/pause_menu.dart';
@@ -22,22 +26,26 @@ import 'package:space_botato/screens/shop_menu.dart';
 import 'package:space_botato/screens/settings_button.dart';
 import 'package:space_botato/screens/win_screen.dart';
 
+enum Phase { shop, countdown, combat }
+
 class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
   late Player player;
   late JoystickComponent joystick;
+  late TimerComponent waveTimer;
+
   List<Enemy> enemies = [];
   bool waveCompleted = false;
+  Phase currentPhase = Phase.shop;
+  double waveDuration = 30.0;
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
     final prefs = await ref.read(sharedPreferencesProvider.future);
-    // Initialiser les providers avec les valeurs stockées
     ref.read(waveProvider.notifier).state = prefs.getInt('wave') ?? 1;
     ref.read(goldProvider.notifier).state = prefs.getInt('gold') ?? 0;
 
-    // Initialisation du joystick
     joystick = JoystickComponent(
       knob: CircleComponent(radius: 20, paint: Paint()..color = Colors.grey),
       background: CircleComponent(
@@ -51,29 +59,70 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
     showMainMenu();
   }
 
+  void startWaveCountdown() {
+    currentPhase = Phase.countdown;
+    overlays.add(WaveCountdownOverlay.id);
+
+    Future.delayed(const Duration(seconds: 3), () {
+      overlays.remove(WaveCountdownOverlay.id);
+      startCombatPhase();
+    });
+  }
+
+  void startCombatPhase() {
+    currentPhase = Phase.combat;
+    ref.read(gameStateProvider.notifier).state = GameState.playing;
+
+    waveTimer = TimerComponent(
+      period: waveDuration,
+      repeat: false,
+      onTick: onWaveCompleted,
+    );
+    add(waveTimer);
+
+    startSpawningEnemies();
+  }
+
+  void onWaveCompleted() {
+    if (currentPhase != Phase.combat) return;
+    currentPhase = Phase.shop;
+
+    enemies.clear();
+    children.whereType<Enemy>().forEach(remove);
+
+    ref.read(gameStateProvider.notifier).state = GameState.shopping;
+    overlays.add(ShopMenu.id);
+  }
+
   void showMainMenu() {
     ref.read(gameStateProvider.notifier).state = GameState.menu;
     overlays.add(MainMenu.id);
   }
 
-  void startNewGame() {
+  void startNewGame(PlayerClassDetails selectedClass) {
+    ref.read(waveProvider.notifier).state = 1;
+    ref.read(gameStateProvider.notifier).state = GameState.playing;
+    ref.read(playerClassProvider.notifier).state = selectedClass;
+    overlays.clear();
     enemies.clear();
+
+    children.whereType<Player>().forEach(remove);
     children.whereType<Enemy>().forEach(remove);
     children.whereType<Bullet>().forEach(remove);
 
-    ref.read(waveProvider.notifier).state = 1;
+    overlays.add(SettingsButton.id);
 
-    player = Player();
+    player =
+        Player(selectedClass: ref.read(playerClassProvider.notifier).state);
     player.position = size / 2;
     add(player);
 
-    overlays.remove(MainMenu.id);
+    //startAutoShoot();
+  }
 
-    ref.read(gameStateProvider.notifier).state = GameState.playing;
-    overlays.add(SettingsButton.id);
-
-    startSpawningEnemies();
-    startAutoShoot();
+  void classSelection() {
+    ref.read(gameStateProvider.notifier).state = GameState.classSelection;
+    overlays.add(ClassSelectionScreen.id);
   }
 
   void startAutoShoot() {
@@ -100,17 +149,11 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
         final direction = (closestEnemy.position - playerPos).normalized();
         final bullet = Bullet(direction: direction);
         bullet.position = player.position;
-        //FlameAudio.play('simple_shoot.mp3');
         add(bullet);
       }
     });
   }
 
-  /// Starts spawning [wave * 5] enemies at random intervals between 0 and 5
-  /// seconds. The spawned enemies are added to the [enemies] list.
-  ///
-  /// This is intended to be called when the game starts, or when the player
-  /// reaches a new wave.
   void startSpawningEnemies() {
     var maxEnemies =
         ref.read(waveProvider.notifier).state * Random().nextInt(3) + 2;
@@ -153,26 +196,21 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
   }
 
   void pauseGame() {
-    ref.read(gameStateProvider.notifier).state = GameState.paused;
     pauseEngine();
+    ref.read(gameStateProvider.notifier).state = GameState.paused;
     overlays.remove(SettingsButton.id);
     overlays.add(PauseMenu.id);
   }
 
   void resetGame() {
-    pauseEngine();
     enemies.clear();
+    player.removeFromParent();
     children.whereType<Enemy>().forEach(remove);
     children.whereType<Bullet>().forEach(remove);
-    // Supprimer le joueur actuel
     player.removeFromParent();
-    // Retirer tous les overlays de jeu
     overlays.clear();
-    // Réinitialiser l'état
     ref.read(gameStateProvider.notifier).state = GameState.menu;
-    // Afficher le menu principal
     showMainMenu();
-    // Redémarrer le moteur de jeu
     resumeEngine();
   }
 
@@ -206,11 +244,10 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
     overlays.remove(ShopMenu.id);
     resumeEngine();
     ref.read(waveProvider.notifier).state++;
-    startSpawningEnemies();
+    startWaveCountdown();
   }
 
   void buyUpgrade(String type) {
-    // Logique d'achat
     resumeFromShop();
   }
 
@@ -225,17 +262,15 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
   @override
   void update(double dt) {
     if (ref.read(gameStateProvider.notifier).state != GameState.playing) return;
-    print("enemies.length: ${enemies.length}");
-    print("current wave: ${ref.read(waveProvider.notifier).state}");
+    //print("enemies.length: \${enemies.length}");
+    //print("current wave: \${ref.read(waveProvider.notifier).state}");
 
-    if (waveCompleted &&
+    if (currentPhase == Phase.combat &&
         enemies.isEmpty &&
-        ref.read(waveProvider.notifier).state < kMaxWaves) {
-      print("wave completed, showing shop");
-      ref.read(gameStateProvider.notifier).state = GameState.shopping;
-      pauseEngine();
-      overlays.add(ShopMenu.id);
+        !waveTimer.timer.isRunning()) {
+      onWaveCompleted();
     }
+
     if (waveCompleted &&
         enemies.isEmpty &&
         ref.read(waveProvider.notifier).state == kMaxWaves) {
@@ -249,16 +284,16 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
   KeyEventResult onKeyEvent(
       KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
-      player.position.x -= 450 * 0.016; // dt approximatif
+      player.position.x -= 400 * 0.016;
     }
     if (keysPressed.contains(LogicalKeyboardKey.arrowRight)) {
-      player.position.x += 450 * 0.016; // dt approximatif
+      player.position.x += 400 * 0.016;
     }
     if (keysPressed.contains(LogicalKeyboardKey.arrowUp)) {
-      player.position.y -= 450 * 0.016; // dt approximatif
+      player.position.y -= 400 * 0.016;
     }
     if (keysPressed.contains(LogicalKeyboardKey.arrowDown)) {
-      player.position.y += 450 * 0.016; // dt approximatif
+      player.position.y += 400 * 0.016;
     }
     if (keysPressed.contains(LogicalKeyboardKey.escape)) {
       pauseGame();

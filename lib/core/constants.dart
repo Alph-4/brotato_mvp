@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:space_botato/screens/class_selection_screen.dart';
 import 'package:space_botato/screens/death_menu.dart';
 import 'package:space_botato/screens/main_menu.dart';
 import 'package:space_botato/screens/pause_menu.dart';
@@ -20,7 +21,6 @@ final kButtonStyle = ElevatedButton.styleFrom(
   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
 );
 
-
 final gameOverlays = {
   MainMenu.id: (context, game) => MainMenu(game: game),
   PauseMenu.id: (context, game) => PauseMenu(game: game),
@@ -28,15 +28,14 @@ final gameOverlays = {
   ShopMenu.id: (context, game) => ShopMenu(game: game),
   SettingsButton.id: (context, game) => SettingsButton(game: game),
   WinScreen.id: (context, game) => WinScreen(game: game),
+  ClassSelectionScreen.id: (context, game) => ClassSelectionScreen(
+        onClassSelected: (selectedClass) {
+            
+          game.startNewGame(selectedClass); // Pass the selected class
+        },
+      ),
 };
 
-// Configuration du joueur
-const kPlayerInitialHealth = 100.0;
-const kPlayerInitialExp = 0.0;
-const kPlayerMaxExp = 100.0;
-const kPlayerSpeed = 450.0;
-const kPlayerSize = 64.0;
-const kPlayerHitboxSize = 50.0;
 
 // Configuration des ennemis
 const kEnemySize = 100.0;
@@ -55,5 +54,5 @@ const kHudPadding = 10.0;
 const kHudCornerRadius = 5.0;
 
 // Configuration du jeu
-const kMaxSpawnDelay = 5; 
+const kMaxSpawnDelay = 5;
 const kMaxWaves = 3;

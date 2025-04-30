@@ -22,7 +22,7 @@ class DeathMenu extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               style: kButtonStyle,
-              onPressed: () => game.startNewGame(),
+              onPressed: () => game.startNewGame(game.player.selectedClass),
               child: const Text('Try Again'),
             ),
             const SizedBox(height: 10),
