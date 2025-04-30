@@ -1,0 +1,2 @@
+F:/Flutter/brotato_mvp/android/app/.cxx/Debug/2n5t2958/arm64-v8a/CMakeFiles/edit_cache.dir
+F:/Flutter/brotato_mvp/android/app/.cxx/Debug/2n5t2958/arm64-v8a/CMakeFiles/rebuild_cache.dir
