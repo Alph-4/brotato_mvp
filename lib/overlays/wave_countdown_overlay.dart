@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:space_botato/core/game.dart';
 
 class WaveCountdownOverlay extends StatelessWidget {
   static const String id = 'WaveCountdownOverlay';
+  final SpaceBotatoGame game;
 
-  final int countdown;
-
-  const WaveCountdownOverlay({Key? key, required this.countdown})
-      : super(key: key);
+  const WaveCountdownOverlay({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +16,10 @@ class WaveCountdownOverlay extends StatelessWidget {
           color: Colors.black.withOpacity(0.7),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Text(
-          'Next Wave in $countdown...',
-          style: const TextStyle(
-            fontSize: 24,
+        child: const Text(
+          'Get Ready!',
+          style: TextStyle(
+            fontSize: 32,
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),

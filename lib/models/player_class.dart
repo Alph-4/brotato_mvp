@@ -75,3 +75,39 @@ class PlayerClassDetails {
   static PlayerClassDetails get(PlayerClass playerClass) =>
       classes[playerClass]!;
 }
+
+class PlayerStats {
+  double maxHealth;
+  double currentHealth;
+  double damage;
+  double defense;
+  double moveSpeed;
+  double attackSpeed;
+  double critChance;
+  double range;
+
+  PlayerStats({
+    required this.maxHealth,
+    required this.currentHealth,
+    required this.damage,
+    required this.defense,
+    required this.moveSpeed,
+    required this.attackSpeed,
+    required this.critChance,
+    required this.range,
+  });
+
+  factory PlayerStats.fromClass(PlayerClassDetails details) {
+    return PlayerStats(
+      maxHealth: details.maxHealth.toDouble(),
+      currentHealth: details.maxHealth.toDouble(),
+      damage: details.attack.toDouble(),
+      defense: details.defense.toDouble(),
+      moveSpeed: details.moveSpeed,
+      attackSpeed: details.attackSpeed,
+      critChance: details
+          .dodgeRate, // Using dodgeRate as critChance for now or add crit to details
+      range: 200, // Default range
+    );
+  }
+}

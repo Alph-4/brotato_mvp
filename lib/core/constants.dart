@@ -1,13 +1,13 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:space_botato/screens/class_selection_screen.dart';
 import 'package:space_botato/screens/death_menu.dart';
 import 'package:space_botato/screens/main_menu.dart';
 import 'package:space_botato/screens/pause_menu.dart';
 import 'package:space_botato/screens/settings_button.dart';
+import 'package:space_botato/screens/settings_screen.dart';
 import 'package:space_botato/screens/shop_menu.dart';
 import 'package:space_botato/screens/win_screen.dart';
+import 'package:space_botato/overlays/wave_countdown_overlay.dart';
 
 // Styles communs
 const kTextStyle = TextStyle(
@@ -28,14 +28,14 @@ final gameOverlays = {
   ShopMenu.id: (context, game) => ShopMenu(game: game),
   SettingsButton.id: (context, game) => SettingsButton(game: game),
   WinScreen.id: (context, game) => WinScreen(game: game),
+  WaveCountdownOverlay.id: (context, game) => WaveCountdownOverlay(game: game),
+  SettingsScreen.id: (context, game) => SettingsScreen(game: game),
   ClassSelectionScreen.id: (context, game) => ClassSelectionScreen(
         onClassSelected: (selectedClass) {
-            
           game.startNewGame(selectedClass); // Pass the selected class
         },
       ),
 };
-
 
 // Configuration des ennemis
 const kEnemySize = 100.0;

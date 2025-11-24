@@ -1,105 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/game.dart';
+import 'package:space_botato/core/providers.dart';
+import 'package:space_botato/core/shop_logic.dart';
+import 'package:space_botato/models/upgrade.dart';
 
-class ShopMenu extends StatelessWidget {
+class ShopMenu extends ConsumerWidget {
   static const id = 'ShopID';
   final SpaceBotatoGame game;
   const ShopMenu({super.key, required this.game});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final upgrades = ref.watch(shopOptionsProvider);
+    final gold = ref.watch(goldProvider);
+
     return Scaffold(
-        backgroundColor: Colors.black54,
+        backgroundColor: Colors.black87,
         body: Stack(
           children: [
             Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
               children: [
                 Text(
                   'SHOP',
-                  style: kTextStyle.copyWith(fontSize: 48),
+                  style: kTextStyle.copyWith(fontSize: 48, color: Colors.amber),
                 ),
+                const SizedBox(height: 10),
+                Text(
+                  'Gold: $gold',
+                  style:
+                      kTextStyle.copyWith(fontSize: 24, color: Colors.yellow),
+                ),
+                const SizedBox(height: 40),
+                if (upgrades.isEmpty)
+                  const Text(
+                    "Sold Out!",
+                    style: TextStyle(color: Colors.white, fontSize: 30),
+                  )
+                else
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    alignment: WrapAlignment.center,
+                    children: upgrades.map((upgrade) {
+                      final canAfford = gold >= upgrade.cost;
+                      return _buildUpgradeCard(
+                        upgrade: upgrade,
+                        canAfford: canAfford,
+                        onTap: () {
+                          if (canAfford) {
+                            game.buyUpgrade(upgrade);
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+                const SizedBox(height: 40),
                 Row(
-                  spacing: 16,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildUpgradeCard(
-                      title: 'Damage Up',
-                      icon: Icons.local_fire_department,
-                      color: Colors.red,
-                      onTap: () => game.buyUpgrade('damage'),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (gold >= 5) {
+                          ref.read(goldProvider.notifier).state -= 5;
+                          generateShopOptions(ref);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 15),
+                      ),
+                      child: const Text('Reroll (5 Gold)',
+                          style: TextStyle(fontSize: 20)),
                     ),
-                    _buildUpgradeCard(
-                      title: 'Speed Up',
-                      icon: Icons.speed,
-                      color: Colors.blue,
-                      onTap: () => game.buyUpgrade('speed'),
-                    ),
-                    _buildUpgradeCard(
-                      title: 'Health Up',
-                      icon: Icons.favorite,
-                      color: Colors.green,
-                      onTap: () => game.buyUpgrade('health'),
+                    const SizedBox(width: 20),
+                    ElevatedButton(
+                      onPressed: () => game.resumeFromShop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 15),
+                      ),
+                      child: const Text('Next Wave',
+                          style: TextStyle(fontSize: 20)),
                     ),
                   ],
                 ),
-                /*
-                GestureDetector(
-                  onTap: () => game.resumeFromShop(),
-                  child: Container(
-                    width: 200,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.purple,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.purple.withOpacity(0.3),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Continue',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                */
               ],
             ),
             Positioned(
               top: 20,
               right: 20,
-              child: Material(
-                color: Colors.transparent,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.settings,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                  onPressed: () => game.pauseGame(),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black38,
-                    padding: const EdgeInsets.all(8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+              child: IconButton(
+                icon: const Icon(Icons.settings, color: Colors.white, size: 32),
+                onPressed: () => game.pauseGame(),
               ),
             )
           ],
@@ -107,43 +105,52 @@ class ShopMenu extends StatelessWidget {
   }
 
   Widget _buildUpgradeCard({
-    required String title,
-    required IconData icon,
-    required Color color,
+    required Upgrade upgrade,
+    required bool canAfford,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: canAfford ? onTap : null,
       child: Container(
+          width: 200,
+          height: 250,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: color.withOpacity(0.2),
-            border: Border.all(color: color, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.3),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(12),
+            color: canAfford
+                ? upgrade.color.withOpacity(0.2)
+                : Colors.grey.withOpacity(0.2),
+            border: Border.all(
+                color: canAfford ? upgrade.color : Colors.grey, width: 2),
           ),
           child: Padding(
-            padding: EdgeInsets.all(8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Icon(
-                  icon,
-                  size: 40,
-                  color: color,
+                  upgrade.icon,
+                  size: 50,
+                  color: canAfford ? upgrade.color : Colors.grey,
                 ),
-                const SizedBox(width: 20),
                 Text(
-                  title,
+                  upgrade.name,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: color,
-                    fontSize: 24,
+                    color: canAfford ? upgrade.color : Colors.grey,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  upgrade.description,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                Text(
+                  '${upgrade.cost} G',
+                  style: TextStyle(
+                    color: canAfford ? Colors.yellow : Colors.red,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -11,24 +10,27 @@ import 'package:space_botato/components/enemy/enemy.dart';
 import 'package:space_botato/components/enemy/flying_enemy.dart';
 import 'dart:async' as da;
 import 'package:space_botato/components/enemy/mushroom_enemy.dart';
-import 'package:space_botato/components/hud/hud.dart';
 import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/providers.dart';
 import 'package:space_botato/main.dart';
 import 'package:space_botato/components/player/player.dart';
 import 'package:space_botato/models/player_class.dart';
 import 'package:space_botato/overlays/wave_countdown_overlay.dart';
+import 'package:space_botato/core/shop_logic.dart';
+import 'package:space_botato/models/upgrade.dart';
 import 'package:space_botato/screens/class_selection_screen.dart';
 import 'package:space_botato/screens/death_menu.dart';
 import 'package:space_botato/screens/main_menu.dart';
 import 'package:space_botato/screens/pause_menu.dart';
+import 'package:space_botato/screens/settings_screen.dart';
 import 'package:space_botato/screens/shop_menu.dart';
 import 'package:space_botato/screens/settings_button.dart';
 import 'package:space_botato/screens/win_screen.dart';
 
 enum Phase { shop, countdown, combat }
 
-class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
+class SpaceBotatoGame extends FlameGame
+    with RiverpodGameMixin, HasCollisionDetection, KeyboardEvents {
   late Player player;
   late JoystickComponent joystick;
   late TimerComponent waveTimer;
@@ -90,6 +92,9 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
     enemies.clear();
     children.whereType<Enemy>().forEach(remove);
 
+    // Generate shop options
+    generateShopOptionsComponentRef(ref);
+
     ref.read(gameStateProvider.notifier).state = GameState.shopping;
     overlays.add(ShopMenu.id);
   }
@@ -116,42 +121,11 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
         Player(selectedClass: ref.read(playerClassProvider.notifier).state);
     player.position = size / 2;
     add(player);
-
-    //startAutoShoot();
   }
 
   void classSelection() {
     ref.read(gameStateProvider.notifier).state = GameState.classSelection;
     overlays.add(ClassSelectionScreen.id);
-  }
-
-  void startAutoShoot() {
-    da.Timer.periodic(Duration(seconds: 1), (timer) {
-      if (ref.read(gameStateProvider.notifier).state != GameState.playing)
-        return;
-
-      final enemies = children.whereType<Enemy>().toList();
-      if (enemies.isEmpty) return;
-
-      Vector2 playerPos = player.position;
-      Enemy? closestEnemy;
-      double closestDistance = double.infinity;
-
-      for (final enemy in enemies) {
-        final distance = (enemy.position - playerPos).length;
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestEnemy = enemy;
-        }
-      }
-
-      if (closestEnemy != null) {
-        final direction = (closestEnemy.position - playerPos).normalized();
-        final bullet = Bullet(direction: direction);
-        bullet.position = player.position;
-        add(bullet);
-      }
-    });
   }
 
   void startSpawningEnemies() {
@@ -247,8 +221,41 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
     startWaveCountdown();
   }
 
-  void buyUpgrade(String type) {
-    resumeFromShop();
+  void buyUpgrade(Upgrade upgrade) {
+    final currentGold = ref.read(goldProvider);
+    if (currentGold >= upgrade.cost) {
+      ref.read(goldProvider.notifier).state -= upgrade.cost;
+
+      // Apply stats
+      upgrade.effects.forEach((stat, value) {
+        switch (stat) {
+          case StatType.maxHealth:
+            player.stats.maxHealth += value;
+            player.stats.currentHealth += value;
+            break;
+          case StatType.damage:
+            player.stats.damage += value;
+            break;
+          case StatType.attackSpeed:
+            player.stats.attackSpeed += value;
+            break;
+          case StatType.moveSpeed:
+            player.stats.moveSpeed += value;
+            break;
+          case StatType.defense:
+            player.stats.defense += value;
+            break;
+          case StatType.critChance:
+            player.stats.critChance += value;
+            break;
+        }
+      });
+
+      // Remove the bought item from the shop (optional, but good UX)
+      final currentOptions = ref.read(shopOptionsProvider);
+      ref.read(shopOptionsProvider.notifier).state =
+          currentOptions.where((u) => u.id != upgrade.id).toList();
+    }
   }
 
   void onPlayerDeath() {
@@ -283,6 +290,10 @@ class SpaceBotatoGame extends FlameGame with RiverpodGameMixin {
 
   KeyEventResult onKeyEvent(
       KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    if (ref.read(gameStateProvider.notifier).state != GameState.playing) {
+      return KeyEventResult.ignored;
+    }
+
     if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
       player.position.x -= 400 * 0.016;
     }

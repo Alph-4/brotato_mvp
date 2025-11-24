@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:space_botato/core/game.dart';
-import '../screens/class_selection_screen.dart';
-import '../models/player_class.dart';
+import 'package:space_botato/screens/settings_screen.dart';
 
 class MainMenu extends StatelessWidget {
   static const id = 'MainID';
@@ -55,7 +54,7 @@ class MainMenu extends StatelessWidget {
                     SizedBox(height: 8),
                     GestureDetector(
                       onTap: () {
-                        //Navigator.of(context).pushNamed(SettingsMenu.id);
+                        game.overlays.add(SettingsScreen.id);
                       },
                       child: Container(
                         width: 200,

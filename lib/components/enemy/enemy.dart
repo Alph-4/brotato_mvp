@@ -23,9 +23,7 @@ abstract class Enemy extends SpriteAnimationComponent
 
   @override
   void update(double dt) {
-    if (game.player != null) {
-      //moveTowardsPlayer(game.player.position, dt);
-    }
+    // moveTowardsPlayer(game.player.position, dt);
     super.update(dt);
   }
 
