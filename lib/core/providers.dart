@@ -11,8 +11,10 @@ final playerClassProvider = StateProvider<PlayerClassDetails>((ref) {
 final waveProvider = StateProvider<int>((_) => 1);
 final gameStateProvider = StateProvider<GameState>((_) => GameState.menu);
 final goldProvider = StateProvider<int>((ref) => 0);
+
 final soundEnabledProvider = StateProvider<bool>((ref) => true);
 final vibrationEnabledProvider = StateProvider<bool>((ref) => true);
+final volumeProvider = StateProvider<double>((ref) => 1.0);
 
 final sharedPreferencesProvider =
     FutureProvider<SharedPreferences>((ref) async {

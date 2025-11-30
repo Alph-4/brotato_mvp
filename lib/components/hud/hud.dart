@@ -75,6 +75,7 @@ class GameHUD extends PositionComponent with HasGameReference<SpaceBotatoGame> {
   void updateTimer(double timer) {
     _timer = timer;
   }
+  
 
   void updateLevel(int level) {
     _level = level;

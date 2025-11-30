@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 import 'package:flame/geometry.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
@@ -44,6 +45,7 @@ class SpaceBotatoGame extends FlameGame
   late JoystickComponent joystick;
   TimerComponent? waveTimer;
   TimerComponent? enemySpawner;
+  late TextComponent waveText;
   late TextComponent waveTimerText;
 
   List<Enemy> enemies = [];
@@ -81,19 +83,31 @@ class SpaceBotatoGame extends FlameGame
     );
     add(joystick);
 
-    waveTimerText = TextComponent(
-      text: '',
-      position: Vector2(size.x / 2, 20),
+    waveText = TextComponent(
+      text: ref.watch(waveProvider).toString(),
+      position: Vector2(size.x / 2, 10),
       anchor: Anchor.topCenter,
       priority: 100,
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 32,
+          fontSize: 64,
           fontWeight: FontWeight.bold,
         ),
       ),
     );
+    waveTimerText = TextComponent(
+        text: '',
+        position: Vector2(size.x / 2, 20),
+        anchor: Anchor.topCenter,
+        priority: 100,
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+          ),
+        ));
     add(waveTimerText);
 
     showMainMenu();
@@ -193,7 +207,8 @@ class SpaceBotatoGame extends FlameGame
     // Remove previous spawner if exists
     enemySpawner?.removeFromParent();
     enemySpawner = TimerComponent(
-      period: kMaxSpawnDelay.toDouble(), // Or dynamic value
+      period: (kMaxSpawnDelay.toDouble() *
+          ref.read(waveProvider.notifier).state), // Or dynamic value
       repeat: true,
       onTick: spawnEnemy,
     );
@@ -206,12 +221,24 @@ class SpaceBotatoGame extends FlameGame
 
     final enemy = FlyingEnemy();
     Vector2 enemyPosition;
-    do {
-      enemyPosition = Vector2(
-        Random().nextDouble() * mapWidth,
-        Random().nextDouble() * mapHeight,
-      );
-    } while ((enemyPosition - player.position).length < kEnemySize);
+    // Spawn sur un bord aléatoire
+    int side = Random().nextInt(4); // 0: haut, 1: bas, 2: gauche, 3: droite
+    switch (side) {
+      case 0:
+        enemyPosition = Vector2(Random().nextDouble() * mapWidth, 0);
+        break;
+      case 1:
+        enemyPosition = Vector2(Random().nextDouble() * mapWidth, mapHeight);
+        break;
+      case 2:
+        enemyPosition = Vector2(0, Random().nextDouble() * mapHeight);
+        break;
+      case 3:
+        enemyPosition = Vector2(mapWidth, Random().nextDouble() * mapHeight);
+        break;
+      default:
+        enemyPosition = Vector2(mapWidth / 2, 0);
+    }
     enemy.position = enemyPosition;
     add(enemy);
     enemies.add(enemy);
@@ -219,13 +246,24 @@ class SpaceBotatoGame extends FlameGame
     int wave = ref.read(waveProvider);
     if (wave == 2 || wave == 3) {
       final mush = MushroomEnemy();
+      int side2 = Random().nextInt(4);
       Vector2 pos2;
-      do {
-        pos2 = Vector2(
-          Random().nextDouble() * mapWidth,
-          Random().nextDouble() * mapHeight,
-        );
-      } while ((pos2 - player.position).length < kEnemySize);
+      switch (side2) {
+        case 0:
+          pos2 = Vector2(Random().nextDouble() * mapWidth, 0);
+          break;
+        case 1:
+          pos2 = Vector2(Random().nextDouble() * mapWidth, mapHeight);
+          break;
+        case 2:
+          pos2 = Vector2(0, Random().nextDouble() * mapHeight);
+          break;
+        case 3:
+          pos2 = Vector2(mapWidth, Random().nextDouble() * mapHeight);
+          break;
+        default:
+          pos2 = Vector2(mapWidth / 2, 0);
+      }
       mush.position = pos2;
       add(mush);
       enemies.add(mush);

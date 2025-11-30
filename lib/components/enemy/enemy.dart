@@ -26,7 +26,7 @@ abstract class Enemy extends SpriteAnimationComponent
 
   @override
   void update(double dt) {
-    // moveTowardsPlayer(game.player.position, dt);
+    moveTowardsPlayer(game.player.position, dt);
     super.update(dt);
   }
 
@@ -73,15 +73,15 @@ abstract class Enemy extends SpriteAnimationComponent
         game.enemies.remove(this);
       }
     } else if (other is Player) {
-      hitbox.paint.color = _collisionPlayerHitColor;
+      // hitbox.paint.color = _collisionPlayerHitColor;
     } else if (other is Enemy) {
-      hitbox.paint.color = _collisionStartColor;
+      //hitbox.paint.color = _collisionStartColor;
     }
   }
 
   @override
   void onCollisionEnd(PositionComponent other) {
     super.onCollisionEnd(other);
-    hitbox.paint.color = _defaultColor;
+    //hitbox.paint.color = _defaultColor;
   }
 }
