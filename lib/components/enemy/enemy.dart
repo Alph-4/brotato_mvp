@@ -1,12 +1,15 @@
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:space_botato/components/bullet/bullet.dart';
 import 'package:space_botato/components/enemy/mushroom_enemy.dart';
 import 'package:space_botato/components/player/player.dart';
 import 'package:space_botato/core/constants.dart';
 import 'package:space_botato/core/game.dart';
+import 'package:space_botato/core/providers.dart';
 import 'package:space_botato/components/enemy/flying_enemy.dart';
+import 'package:space_botato/components/gold_drop.dart';
 
 abstract class Enemy extends SpriteAnimationComponent
     with HasGameReference<SpaceBotatoGame>, CollisionCallbacks {
@@ -39,6 +42,12 @@ abstract class Enemy extends SpriteAnimationComponent
     super.onCollisionStart(intersectionPoints, other);
     if (other is Bullet) {
       other.removeFromParent();
+
+      // Drop GoldDrop (cercle jaune) à la mort de l'ennemi
+      if (Random().nextDouble() < 0.3) {
+        game.add(GoldDrop(position: position.clone()));
+      }
+
       if (this is FlyingEnemy) {
         final flyingEnemy = this as FlyingEnemy;
         flyingEnemy.animation = flyingEnemy.animations.death;

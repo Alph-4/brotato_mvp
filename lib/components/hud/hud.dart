@@ -28,6 +28,10 @@ class GameHUD extends PositionComponent with HasGameReference<SpaceBotatoGame> {
 
   double _displayedHealth = 100;
   double _displayedExp = 0;
+  int _gold = 0;
+  double _timer = 0;
+  int _level = 1;
+  int _wave = 1;
 
   GameHUD() {
     // Use constants for initial position
@@ -62,6 +66,22 @@ class GameHUD extends PositionComponent with HasGameReference<SpaceBotatoGame> {
 
   void updateExp(double newExp) {
     _exp = newExp.clamp(0, _maxExp);
+  }
+
+  void updateGold(int gold) {
+    _gold = gold;
+  }
+
+  void updateTimer(double timer) {
+    _timer = timer;
+  }
+
+  void updateLevel(int level) {
+    _level = level;
+  }
+
+  void updateWave(int wave) {
+    _wave = wave;
   }
 
   void reset() {
@@ -173,10 +193,15 @@ class GameHUD extends PositionComponent with HasGameReference<SpaceBotatoGame> {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Calculate positions dynamically
     double currentY = 0;
 
-    // Draw health bar
+    // Fond HUD
+    canvas.drawRect(
+      Rect.fromLTWH(-10, -10, barWidth + 40, 90),
+      Paint()..color = Colors.black.withOpacity(0.7),
+    );
+
+    // Barre de vie (rouge)
     _drawBar(
       canvas,
       currentY,
@@ -185,27 +210,78 @@ class GameHUD extends PositionComponent with HasGameReference<SpaceBotatoGame> {
       Colors.red,
       'HP',
     );
-    currentY += barHeight + padding;
+    currentY += barHeight + 2;
 
-    // Draw experience bar
+    // Barre d'XP (verte) + niveau
     _drawBar(
       canvas,
       currentY,
       _displayedExp,
       _maxExp,
-      Colors.blue,
-      'EXP',
+      Colors.green,
+      'XP',
     );
-    currentY += barHeight + padding;
+    // Affichage du niveau LV
+    final lvPainter = TextPainter(
+      text: TextSpan(
+        text: 'LV $_level',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    lvPainter.layout();
+    lvPainter.paint(canvas, Offset(barWidth + 10, currentY));
+    currentY += barHeight + 8;
 
-    // Draw attributes
-    _drawAttribute(canvas, currentY, 'Attack', _attack.toString());
-    currentY += attributeSpacing;
-    _drawAttribute(canvas, currentY, 'Defense', _defense.toString());
-    currentY += attributeSpacing;
-    _drawAttribute(canvas, currentY, 'Mana', _mana.toString());
-    currentY += attributeSpacing;
-    _drawAttribute(
-        canvas, currentY, 'Dodge', '${(_dodgeRate * 100).toStringAsFixed(1)}%');
+    // Gold (icône + nombre)
+    final goldPainter = TextPainter(
+      text: TextSpan(
+        text: '🟡 $_gold',
+        style: const TextStyle(
+          color: Colors.yellow,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    goldPainter.layout();
+    goldPainter.paint(canvas, Offset(0, currentY));
+    currentY += goldPainter.height + 8;
+
+    // Indicateur de wave + timer (au centre en haut)
+    final wavePainter = TextPainter(
+      text: TextSpan(
+        text: 'WAVE $_wave',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    wavePainter.layout();
+    wavePainter.paint(
+        canvas, Offset(barWidth / 2 - wavePainter.width / 2, -35));
+
+    final timerPainter = TextPainter(
+      text: TextSpan(
+        text: _timer.toStringAsFixed(0),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    timerPainter.layout();
+    timerPainter.paint(
+        canvas, Offset(barWidth / 2 - timerPainter.width / 2, -5));
   }
 }

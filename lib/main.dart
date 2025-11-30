@@ -48,11 +48,19 @@ class MyApp extends StatelessWidget {
       title: 'Space Botato',
       theme: ThemeData.dark(),
       home: Scaffold(
-        body: RiverpodAwareGameWidget(
-          key: gameWidgetKey,
-          game: gameInstance,
-          initialActiveOverlays: const [MainMenu.id],
-          overlayBuilderMap: gameOverlays,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox(
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              child: RiverpodAwareGameWidget(
+                key: gameWidgetKey,
+                game: gameInstance,
+                initialActiveOverlays: const [MainMenu.id],
+                overlayBuilderMap: gameOverlays,
+              ),
+            );
+          },
         ),
       ),
     ));

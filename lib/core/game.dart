@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flame/geometry.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -33,12 +34,17 @@ class SpaceBotatoGame extends FlameGame
     with RiverpodGameMixin, HasCollisionDetection, KeyboardEvents {
   late Player player;
   late JoystickComponent joystick;
-  late TimerComponent waveTimer;
+  TimerComponent? waveTimer;
+  late TextComponent waveTimerText;
 
   List<Enemy> enemies = [];
   bool waveCompleted = false;
   Phase currentPhase = Phase.shop;
   double waveDuration = 30.0;
+
+  // Taille de la map
+  final double mapWidth = 2000;
+  final double mapHeight = 2000;
 
   @override
   Future<void> onLoad() async {
@@ -47,6 +53,14 @@ class SpaceBotatoGame extends FlameGame
     final prefs = await ref.read(sharedPreferencesProvider.future);
     ref.read(waveProvider.notifier).state = prefs.getInt('wave') ?? 1;
     ref.read(goldProvider.notifier).state = prefs.getInt('gold') ?? 0;
+
+    // Ajoute le background (remplace background.png par ton image)
+    add(SpriteComponent(
+      sprite: await loadSprite('background.png'),
+      size: Vector2(mapWidth, mapHeight),
+      position: Vector2.zero(),
+      priority: -1,
+    ));
 
     joystick = JoystickComponent(
       knob: CircleComponent(radius: 20, paint: Paint()..color = Colors.grey),
@@ -58,6 +72,21 @@ class SpaceBotatoGame extends FlameGame
     );
     add(joystick);
 
+    waveTimerText = TextComponent(
+      text: '',
+      position: Vector2(size.x / 2, 20),
+      anchor: Anchor.topCenter,
+      priority: 100,
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+    add(waveTimerText);
+
     showMainMenu();
   }
 
@@ -65,7 +94,7 @@ class SpaceBotatoGame extends FlameGame
     currentPhase = Phase.countdown;
     overlays.add(WaveCountdownOverlay.id);
 
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 2), () {
       overlays.remove(WaveCountdownOverlay.id);
       startCombatPhase();
     });
@@ -75,12 +104,18 @@ class SpaceBotatoGame extends FlameGame
     currentPhase = Phase.combat;
     ref.read(gameStateProvider.notifier).state = GameState.playing;
 
+    // Timer décompté : manche N = N×30s
+    int wave = ref.read(waveProvider.notifier).state;
+    waveDuration = wave * 30.0;
+
     waveTimer = TimerComponent(
       period: waveDuration,
       repeat: false,
       onTick: onWaveCompleted,
     );
-    add(waveTimer);
+    add(waveTimer!);
+
+    waveTimerText.text = waveDuration.toStringAsFixed(0);
 
     startSpawningEnemies();
   }
@@ -92,6 +127,10 @@ class SpaceBotatoGame extends FlameGame
     enemies.clear();
     children.whereType<Enemy>().forEach(remove);
 
+    // Nettoie le timer HUD
+    waveTimerText.text = '';
+    waveTimer?.removeFromParent();
+
     // Generate shop options
     generateShopOptionsComponentRef(ref);
 
@@ -102,6 +141,9 @@ class SpaceBotatoGame extends FlameGame
   void showMainMenu() {
     ref.read(gameStateProvider.notifier).state = GameState.menu;
     overlays.add(MainMenu.id);
+    // Nettoie la boucle de jeu et le HUD
+    waveTimerText.text = '';
+    waveTimer?.removeFromParent();
   }
 
   void startNewGame(PlayerClassDetails selectedClass) {
@@ -117,10 +159,16 @@ class SpaceBotatoGame extends FlameGame
 
     overlays.add(SettingsButton.id);
 
+    // Place le joueur au centre de la map
     player =
         Player(selectedClass: ref.read(playerClassProvider.notifier).state);
-    player.position = size / 2;
+    player.position = Vector2(mapWidth / 2, mapHeight / 2);
     add(player);
+
+    // Caméra qui suit le joueur
+    camera.follow(player);
+
+    startWaveCountdown();
   }
 
   void classSelection() {
@@ -129,9 +177,7 @@ class SpaceBotatoGame extends FlameGame
   }
 
   void startSpawningEnemies() {
-    var maxEnemies =
-        ref.read(waveProvider.notifier).state * Random().nextInt(3) + 2;
-    for (int i = 0; i < maxEnemies; i++) {
+    while (true) {
       da.Timer(
           Duration(seconds: (Random().nextDouble() * kMaxSpawnDelay).toInt()),
           () {
@@ -211,6 +257,9 @@ class SpaceBotatoGame extends FlameGame
     ref.read(gameStateProvider.notifier).state = GameState.shopping;
     pauseEngine();
     overlays.add(ShopMenu.id);
+    // Nettoie le timer HUD
+    waveTimerText.text = '';
+    waveTimer?.removeFromParent();
   }
 
   void resumeFromShop() {
@@ -268,13 +317,29 @@ class SpaceBotatoGame extends FlameGame
 
   @override
   void update(double dt) {
-    if (ref.read(gameStateProvider.notifier).state != GameState.playing) return;
-    //print("enemies.length: \${enemies.length}");
-    //print("current wave: \${ref.read(waveProvider.notifier).state}");
+    // La boucle de jeu ne s'exécute que pendant la phase de combat
+    if (ref.read(gameStateProvider.notifier).state != GameState.playing ||
+        currentPhase != Phase.combat) return;
+
+    // Sécurise l'accès au timer
+    double timerValue = waveDuration;
+    if (waveTimer?.timer.isRunning() ?? false) {
+      timerValue =
+          (waveDuration - waveTimer!.timer.current).clamp(0, waveDuration);
+      waveTimerText.text = timerValue.toStringAsFixed(0);
+    }
+
+    // Met à jour le HUD du joueur si présent
+    player.hud.updateGold(ref.read(goldProvider));
+    player.hud.updateExp(player.exp);
+    player.hud.updateHealth(player.stats.currentHealth);
+    player.hud.updateTimer(timerValue);
+    player.hud.updateLevel(player.stats.level);
+    player.hud.updateWave(ref.read(waveProvider));
 
     if (currentPhase == Phase.combat &&
         enemies.isEmpty &&
-        !waveTimer.timer.isRunning()) {
+        !(waveTimer?.timer.isRunning() ?? true)) {
       onWaveCompleted();
     }
 
@@ -284,6 +349,11 @@ class SpaceBotatoGame extends FlameGame
       print("Win");
       ref.read(gameStateProvider.notifier).state = GameState.win;
       overlays.add(WinScreen.id);
+    }
+
+    // Met à jour le timer HUD pendant la phase de combat
+    if (currentPhase == Phase.combat && waveTimer?.timer.isRunning() == true) {
+      waveTimerText.text = waveTimer!.timer.current.toStringAsFixed(0);
     }
     super.update(dt);
   }
