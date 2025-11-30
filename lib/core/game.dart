@@ -32,9 +32,18 @@ enum Phase { shop, countdown, combat }
 
 class SpaceBotatoGame extends FlameGame
     with RiverpodGameMixin, HasCollisionDetection, KeyboardEvents {
+  void onPlayerDeath() {
+    showDeathMenu();
+    enemies.clear();
+    children.whereType<Enemy>().forEach(remove);
+    children.whereType<Bullet>().forEach(remove);
+    player.removeFromParent();
+  }
+
   late Player player;
   late JoystickComponent joystick;
   TimerComponent? waveTimer;
+  TimerComponent? enemySpawner;
   late TextComponent waveTimerText;
 
   List<Enemy> enemies = [];
@@ -95,7 +104,7 @@ class SpaceBotatoGame extends FlameGame
     overlays.add(WaveCountdownOverlay.id);
 
     Future.delayed(const Duration(seconds: 2), () {
-      overlays.remove(WaveCountdownOverlay.id);
+      overlays.clear(); // Force la suppression de tous les overlays
       startCombatPhase();
     });
   }
@@ -124,6 +133,9 @@ class SpaceBotatoGame extends FlameGame
     if (currentPhase != Phase.combat) return;
     currentPhase = Phase.shop;
 
+    // Stop enemy spawner
+    enemySpawner?.removeFromParent();
+
     enemies.clear();
     children.whereType<Enemy>().forEach(remove);
 
@@ -136,6 +148,7 @@ class SpaceBotatoGame extends FlameGame
 
     ref.read(gameStateProvider.notifier).state = GameState.shopping;
     overlays.add(ShopMenu.id);
+    waveCompleted = true;
   }
 
   void showMainMenu() {
@@ -177,42 +190,46 @@ class SpaceBotatoGame extends FlameGame
   }
 
   void startSpawningEnemies() {
-    while (true) {
-      da.Timer(
-          Duration(seconds: (Random().nextDouble() * kMaxSpawnDelay).toInt()),
-          () {
-        if (ref.read(gameStateProvider.notifier).state != GameState.playing)
-          return;
+    // Remove previous spawner if exists
+    enemySpawner?.removeFromParent();
+    enemySpawner = TimerComponent(
+      period: kMaxSpawnDelay.toDouble(), // Or dynamic value
+      repeat: true,
+      onTick: spawnEnemy,
+    );
+    add(enemySpawner!);
+  }
 
-        final enemy = FlyingEnemy();
+  void spawnEnemy() {
+    if (currentPhase != Phase.combat) return;
+    if (ref.read(gameStateProvider) != GameState.playing) return;
 
-        Vector2 enemyPosition;
-        do {
-          enemyPosition = Vector2(
-            Random().nextDouble() * size.x,
-            Random().nextDouble() * size.y,
-          );
-        } while ((enemyPosition - player.position).length < kEnemySize);
+    final enemy = FlyingEnemy();
+    Vector2 enemyPosition;
+    do {
+      enemyPosition = Vector2(
+        Random().nextDouble() * mapWidth,
+        Random().nextDouble() * mapHeight,
+      );
+    } while ((enemyPosition - player.position).length < kEnemySize);
+    enemy.position = enemyPosition;
+    add(enemy);
+    enemies.add(enemy);
 
-        enemy.position = enemyPosition;
-
-        if (ref.read(waveProvider.notifier).state == 2 ||
-            ref.read(waveProvider.notifier).state == 3) {
-          final mushroomEnemy = MushroomEnemy();
-          do {
-            enemyPosition = Vector2(
-              Random().nextDouble() * size.x,
-              Random().nextDouble() * size.y,
-            );
-          } while ((enemyPosition - player.position).length < kEnemySize);
-
-          mushroomEnemy.position = enemyPosition;
-        }
-        add(enemy);
-        enemies.add(enemy);
-      });
+    int wave = ref.read(waveProvider);
+    if (wave == 2 || wave == 3) {
+      final mush = MushroomEnemy();
+      Vector2 pos2;
+      do {
+        pos2 = Vector2(
+          Random().nextDouble() * mapWidth,
+          Random().nextDouble() * mapHeight,
+        );
+      } while ((pos2 - player.position).length < kEnemySize);
+      mush.position = pos2;
+      add(mush);
+      enemies.add(mush);
     }
-    waveCompleted = true;
   }
 
   void pauseGame() {
@@ -307,14 +324,6 @@ class SpaceBotatoGame extends FlameGame
     }
   }
 
-  void onPlayerDeath() {
-    showDeathMenu();
-    enemies.clear();
-    children.whereType<Enemy>().forEach(remove);
-    children.whereType<Bullet>().forEach(remove);
-    player.removeFromParent();
-  }
-
   @override
   void update(double dt) {
     // La boucle de jeu ne s'exécute que pendant la phase de combat
@@ -326,8 +335,9 @@ class SpaceBotatoGame extends FlameGame
     if (waveTimer?.timer.isRunning() ?? false) {
       timerValue =
           (waveDuration - waveTimer!.timer.current).clamp(0, waveDuration);
-      waveTimerText.text = timerValue.toStringAsFixed(0);
     }
+    // Unifie l'affichage du timer HUD
+    waveTimerText.text = timerValue.toStringAsFixed(0);
 
     // Met à jour le HUD du joueur si présent
     player.hud.updateGold(ref.read(goldProvider));
@@ -337,9 +347,10 @@ class SpaceBotatoGame extends FlameGame
     player.hud.updateLevel(player.stats.level);
     player.hud.updateWave(ref.read(waveProvider));
 
-    if (currentPhase == Phase.combat &&
-        enemies.isEmpty &&
-        !(waveTimer?.timer.isRunning() ?? true)) {
+    // Nouvelle condition de fin de manche
+    bool timerFinished = !(waveTimer?.timer.isRunning() ?? true);
+    bool noEnemiesLeft = enemies.isEmpty;
+    if (currentPhase == Phase.combat && timerFinished && noEnemiesLeft) {
       onWaveCompleted();
     }
 
@@ -349,11 +360,6 @@ class SpaceBotatoGame extends FlameGame
       print("Win");
       ref.read(gameStateProvider.notifier).state = GameState.win;
       overlays.add(WinScreen.id);
-    }
-
-    // Met à jour le timer HUD pendant la phase de combat
-    if (currentPhase == Phase.combat && waveTimer?.timer.isRunning() == true) {
-      waveTimerText.text = waveTimer!.timer.current.toStringAsFixed(0);
     }
     super.update(dt);
   }
